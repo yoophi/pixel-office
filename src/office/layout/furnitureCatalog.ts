@@ -26,6 +26,7 @@ export interface LoadedAssetData {
     state?: string; // 'on' | 'off'
     canPlaceOnSurfaces?: boolean;
     backgroundTiles?: number;
+    floorTiles?: number;
     canPlaceOnWalls?: boolean;
   }>;
   sprites: Record<string, SpriteData>;
@@ -63,6 +64,7 @@ export const FURNITURE_CATALOG: CatalogEntryWithCategory[] = [
     sprite: BOOKSHELF_SPRITE,
     isDesk: false,
     category: 'storage',
+    floorTiles: 1,
   },
   {
     type: FurnitureType.PLANT,
@@ -177,6 +179,7 @@ export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
         ...(asset.orientation ? { orientation: asset.orientation } : {}),
         ...(asset.canPlaceOnSurfaces ? { canPlaceOnSurfaces: true } : {}),
         ...(asset.backgroundTiles ? { backgroundTiles: asset.backgroundTiles } : {}),
+        ...(asset.floorTiles !== undefined ? { floorTiles: asset.floorTiles } : {}),
         ...(asset.canPlaceOnWalls ? { canPlaceOnWalls: true } : {}),
       };
     })

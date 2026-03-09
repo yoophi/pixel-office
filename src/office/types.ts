@@ -119,6 +119,8 @@ export interface FurnitureCatalogEntry {
   canPlaceOnSurfaces?: boolean;
   /** Number of tile rows from the top of the footprint that are "background" (allow placement, still block walking). Default 0. */
   backgroundTiles?: number;
+  /** Number of tile rows from the bottom that must stand on floor tiles. Upper rows may overlap walls. */
+  floorTiles?: number;
   /** Whether this item can be placed on wall tiles */
   canPlaceOnWalls?: boolean;
 }
