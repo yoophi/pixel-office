@@ -637,6 +637,13 @@ export class OfficeState {
   }
 
   update(dt: number): void {
+    // Build occupied tiles set from all characters' current tile positions
+    const occupiedByChar = new Map<string, number>();
+    for (const ch of this.characters.values()) {
+      if (ch.matrixEffect === 'despawn') continue;
+      occupiedByChar.set(`${ch.tileCol},${ch.tileRow}`, ch.id);
+    }
+
     const toDelete: number[] = [];
     for (const ch of this.characters.values()) {
       // Handle matrix effect animation
@@ -656,9 +663,15 @@ export class OfficeState {
         continue; // skip normal FSM while effect is active
       }
 
+      // Build occupied tiles excluding this character's own tile
+      const occupiedTiles = new Set<string>();
+      for (const [key, id] of occupiedByChar) {
+        if (id !== ch.id) occupiedTiles.add(key);
+      }
+
       // Temporarily unblock own seat so character can pathfind to it
       this.withOwnSeatUnblocked(ch, () =>
-        updateCharacter(ch, dt, this.walkableTiles, this.seats, this.tileMap, this.blockedTiles),
+        updateCharacter(ch, dt, this.walkableTiles, this.seats, this.tileMap, this.blockedTiles, occupiedTiles),
       );
 
       // Tick bubble timer for waiting bubbles

@@ -93,6 +93,7 @@ export function updateCharacter(
   seats: Map<string, Seat>,
   tileMap: TileTypeVal[][],
   blockedTiles: Set<string>,
+  occupiedTiles?: Set<string>,
 ): void {
   ch.frameTimer += dt;
 
@@ -271,6 +272,12 @@ export function updateCharacter(
       // Move toward next tile in path
       const nextTile = ch.path[0];
       ch.dir = directionBetween(ch.tileCol, ch.tileRow, nextTile.col, nextTile.row);
+
+      // Wait if next tile is occupied by another character
+      const nextKey = `${nextTile.col},${nextTile.row}`;
+      if (occupiedTiles && occupiedTiles.has(nextKey) && ch.moveProgress === 0) {
+        break;
+      }
 
       ch.moveProgress += (WALK_SPEED_PX_PER_SEC / TILE_SIZE) * dt;
 
