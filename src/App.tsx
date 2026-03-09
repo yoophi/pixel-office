@@ -10,7 +10,6 @@ import { EditorToolbar } from './office/editor/EditorToolbar.js';
 import { OfficeState } from './office/engine/officeState.js';
 import { deserializeLayout } from './office/layout/layoutSerializer.js';
 import type { OfficeLayout } from './office/types.js';
-import { normalizeReferenceLayout } from './referenceLayout.js';
 
 const LAYOUT_STORAGE_KEY = 'pixel-agents-migration.layout';
 
@@ -21,8 +20,7 @@ function loadStoredLayout(): OfficeLayout | undefined {
   if (typeof window === 'undefined') return undefined;
   const raw = window.localStorage.getItem(LAYOUT_STORAGE_KEY);
   if (!raw) return undefined;
-  const layout = deserializeLayout(raw);
-  return layout ? normalizeReferenceLayout(layout) : undefined;
+  return deserializeLayout(raw) ?? undefined;
 }
 
 function getOfficeState(): OfficeState {
@@ -40,8 +38,13 @@ function App() {
   const [showWalkable, setShowWalkable] = useState(false);
   const editor = useLocalEditorActions(getOfficeState, editorState, LAYOUT_STORAGE_KEY);
   const nextAgentIdRef = useRef(5);
-  const { assetsReady } = usePixelAgentsAssets(getOfficeState, editor.setSavedLayout, () =>
-    setUiTick((tick) => tick + 1),
+  const handleAssetsLoaded = useCallback(() => {
+    setUiTick((tick) => tick + 1);
+  }, []);
+  const { assetsReady, loadedAssets } = usePixelAgentsAssets(
+    getOfficeState,
+    editor.setSavedLayout,
+    handleAssetsLoaded,
   );
 
   useEffect(() => {
@@ -202,6 +205,7 @@ function App() {
               onWallColorChange={editor.handleWallColorChange}
               onSelectedFurnitureColorChange={editor.handleSelectedFurnitureColorChange}
               onFurnitureTypeChange={editor.handleFurnitureTypeChange}
+              loadedAssets={loadedAssets}
             />
           </div>
         )}
