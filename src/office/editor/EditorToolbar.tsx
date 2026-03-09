@@ -183,6 +183,7 @@ export function EditorToolbar({
   const [showColor, setShowColor] = useState(false);
   const [showWallColor, setShowWallColor] = useState(false);
   const [showFurnitureColor, setShowFurnitureColor] = useState(false);
+  const activeCategories = getActiveCategories();
 
   // Build dynamic catalog from loaded assets
   useEffect(() => {
@@ -195,8 +196,7 @@ export function EditorToolbar({
         console.log(`[EditorToolbar] Catalog build result: ${success}`);
 
         // Reset to first available category if current doesn't exist
-        const activeCategories = getActiveCategories();
-        if (activeCategories.length > 0) {
+        if (activeCategories.length > 0 && !activeCategories.some((cat) => cat.id === activeCategory)) {
           const firstCat = activeCategories[0]?.id;
           if (firstCat) {
             console.log(`[EditorToolbar] Setting active category to: ${firstCat}`);
@@ -207,7 +207,7 @@ export function EditorToolbar({
         console.error(`[EditorToolbar] Error building dynamic catalog:`, err);
       }
     }
-  }, [loadedAssets]);
+  }, [activeCategories, activeCategory, loadedAssets]);
 
   const handleColorChange = useCallback(
     (key: keyof FloorColor, value: number) => {
@@ -449,13 +449,16 @@ export function EditorToolbar({
         <div style={{ display: 'flex', flexDirection: 'column-reverse', gap: 4 }}>
           {/* Category tabs + Pick — just above tool row */}
           <div style={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-            {getActiveCategories().map((cat) => (
+            {activeCategories.map((cat) => (
               <button
                 key={cat.id}
                 style={activeCategory === cat.id ? activeTabStyle : tabStyle}
                 onClick={() => setActiveCategory(cat.id)}
+                title={cat.label}
               >
-                {cat.label}
+                <span style={{ fontSize: '14px', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                  {cat.label}
+                </span>
               </button>
             ))}
             <div

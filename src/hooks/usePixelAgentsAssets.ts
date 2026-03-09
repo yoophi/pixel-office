@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { setWallSprites } from '../office/wallTiles.js';
 import { setCharacterTemplates } from '../office/sprites/spriteData.js';
 import type { OfficeState } from '../office/engine/officeState.js';
+import type { LoadedAssetData } from '../office/layout/furnitureCatalog.js';
 import type { OfficeLayout, SpriteData } from '../office/types.js';
 import { normalizeReferenceLayout } from '../referenceLayout.js';
 
@@ -101,37 +102,141 @@ async function loadDefaultLayout(): Promise<OfficeLayout> {
   if (!response.ok) {
     throw new Error(`Failed to load default layout: ${response.status}`);
   }
-  return normalizeReferenceLayout((await response.json()) as OfficeLayout);
+  return (await response.json()) as OfficeLayout;
+}
+
+type FurnitureCatalogResponse = {
+  assets: Array<{
+    id: string;
+    label: string;
+    category: string;
+    file?: string;
+    width: number;
+    height: number;
+    footprintW: number;
+    footprintH: number;
+    isDesk: boolean;
+    groupId?: string;
+    orientation?: string;
+    state?: string;
+    canPlaceOnSurfaces?: boolean;
+    backgroundTiles?: number;
+    floorTiles?: number;
+    canPlaceOnWalls?: boolean;
+  }>;
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  desks: '#8B6B3F',
+  chairs: '#5C7CFA',
+  storage: '#7A5C58',
+  decor: '#49A078',
+  electronics: '#4C6EF5',
+  wall: '#9C6ADE',
+  misc: '#E0A458',
+};
+
+async function loadFurnitureAssets(): Promise<LoadedAssetData> {
+  const response = await fetch('/assets/furniture/furniture-catalog.json');
+  if (!response.ok) {
+    throw new Error(`Failed to load furniture catalog: ${response.status}`);
+  }
+
+  const payload = (await response.json()) as FurnitureCatalogResponse;
+  const catalog = payload.assets.map((asset) => ({
+    id: asset.id,
+    label: asset.label,
+    category: asset.category,
+    width: asset.width,
+    height: asset.height,
+    footprintW: asset.footprintW,
+    footprintH: asset.footprintH,
+    isDesk: asset.isDesk,
+    ...(asset.groupId ? { groupId: asset.groupId } : {}),
+    ...(asset.orientation ? { orientation: asset.orientation } : {}),
+    ...(asset.state ? { state: asset.state } : {}),
+    ...(asset.canPlaceOnSurfaces ? { canPlaceOnSurfaces: true } : {}),
+    ...(asset.backgroundTiles !== undefined ? { backgroundTiles: asset.backgroundTiles } : {}),
+    ...(asset.floorTiles !== undefined ? { floorTiles: asset.floorTiles } : {}),
+    ...(asset.canPlaceOnWalls ? { canPlaceOnWalls: true } : {}),
+  }));
+
+  // Load actual PNG sprites for each asset that has a file path
+  const spriteEntries = await Promise.all(
+    payload.assets.map(async (asset) => {
+      if (asset.file) {
+        try {
+          const image = await loadImageData(`/assets/${asset.file}`);
+          const sprite = sliceSprite(image, 0, 0, asset.width, asset.height);
+          return [asset.id, sprite] as const;
+        } catch {
+          // Fall back to placeholder if PNG load fails
+          return [asset.id, buildPlaceholderSprite(asset.width, asset.height, asset.category)] as const;
+        }
+      }
+      return [asset.id, buildPlaceholderSprite(asset.width, asset.height, asset.category)] as const;
+    }),
+  );
+
+  const sprites = Object.fromEntries(spriteEntries);
+
+  return { catalog, sprites };
+}
+
+function buildPlaceholderSprite(width: number, height: number, category: string): SpriteData {
+  const fill = CATEGORY_COLORS[category] ?? '#7A7A7A';
+  const stroke = '#1A1A1A';
+  const highlight = '#F5E9D0';
+  const sprite: string[][] = [];
+
+  for (let y = 0; y < height; y++) {
+    const row: string[] = [];
+    for (let x = 0; x < width; x++) {
+      const isBorder = x === 0 || y === 0 || x === width - 1 || y === height - 1;
+      const isHighlight = y === 1 && x > 1 && x < width - 2;
+      row.push(isBorder ? stroke : isHighlight ? highlight : fill);
+    }
+    sprite.push(row);
+  }
+
+  return sprite;
 }
 
 export function usePixelAgentsAssets(
   getOfficeState: () => OfficeState,
   setSavedLayout: (layout: OfficeLayout) => void,
   onLoaded: () => void,
-): { assetsReady: boolean } {
+): { assetsReady: boolean; loadedAssets?: LoadedAssetData } {
   const [assetsReady, setAssetsReady] = useState(false);
+  const [loadedAssets, setLoadedAssets] = useState<LoadedAssetData | undefined>();
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        const [walls, characters, defaultLayout] = await Promise.all([
+        const [walls, characters, defaultLayout, furnitureAssets] = await Promise.all([
           loadWallSprites(),
           loadCharacterSprites(),
           loadDefaultLayout(),
+          loadFurnitureAssets(),
         ]);
 
         if (cancelled) return;
 
         setWallSprites(walls);
         setCharacterTemplates(characters);
+        setLoadedAssets(furnitureAssets);
 
         const officeState = getOfficeState();
         const hasStoredLayout = Boolean(window.localStorage.getItem('pixel-agents-migration.layout'));
         if (!hasStoredLayout) {
-          officeState.rebuildFromLayout(defaultLayout);
-          setSavedLayout(defaultLayout);
+          const normalizedLayout = normalizeReferenceLayout(
+            defaultLayout,
+            new Set(furnitureAssets.catalog.map((asset) => asset.id)),
+          );
+          officeState.rebuildFromLayout(normalizedLayout);
+          setSavedLayout(normalizedLayout);
         }
 
         setAssetsReady(true);
@@ -147,5 +252,5 @@ export function usePixelAgentsAssets(
     };
   }, [getOfficeState, onLoaded, setSavedLayout]);
 
-  return { assetsReady };
+  return { assetsReady, loadedAssets };
 }

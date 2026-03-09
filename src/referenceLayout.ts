@@ -40,9 +40,15 @@ function createReferenceFurniture(): PlacedFurniture[] {
   ];
 }
 
-export function normalizeReferenceLayout(layout: OfficeLayout): OfficeLayout {
+export function normalizeReferenceLayout(
+  layout: OfficeLayout,
+  knownAssetTypes?: Set<string>,
+): OfficeLayout {
   const hasExternalAssetFurniture = layout.furniture.some((item) => item.type.startsWith('ASSET_'));
   if (!hasExternalAssetFurniture) return layout;
+  if (knownAssetTypes && layout.furniture.every((item) => !item.type.startsWith('ASSET_') || knownAssetTypes.has(item.type))) {
+    return layout;
+  }
   return {
     ...layout,
     furniture: createReferenceFurniture(),
