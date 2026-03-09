@@ -36,6 +36,7 @@ function App() {
   const officeState = getOfficeState();
   const [uiTick, setUiTick] = useState(0);
   const [showPathDots, setShowPathDots] = useState(true);
+  const [showWalkable, setShowWalkable] = useState(false);
   const editor = useLocalEditorActions(getOfficeState, editorState, LAYOUT_STORAGE_KEY);
   const nextAgentIdRef = useRef(5);
   const { assetsReady } = usePixelAgentsAssets(getOfficeState, editor.setSavedLayout, () =>
@@ -157,6 +158,14 @@ function App() {
             />
             Show path dots
           </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={showWalkable}
+              onChange={(e) => setShowWalkable(e.target.checked)}
+            />
+            Show walkable tiles
+          </label>
         </div>
 
         <div className="panel-section help-list">
@@ -206,6 +215,7 @@ function App() {
           onZoomChange={editor.handleZoomChange}
           panRef={editor.panRef}
           showPathDots={showPathDots}
+          showWalkable={showWalkable}
         />
       </main>
     </div>

@@ -196,6 +196,37 @@ export function renderScene(
   }
 }
 
+// ── Walkable tile overlay ────────────────────────────────────────
+
+const WALKABLE_TILE_COLOR = 'rgba(60, 130, 255, 0.2)';
+
+export function renderWalkableOverlay(
+  ctx: CanvasRenderingContext2D,
+  tileMap: TileTypeVal[][],
+  blockedTiles: Set<string>,
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+): void {
+  const s = TILE_SIZE * zoom;
+  const rows = tileMap.length;
+  const cols = rows > 0 ? tileMap[0].length : 0;
+
+  ctx.save();
+  ctx.fillStyle = WALKABLE_TILE_COLOR;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const t = tileMap[r][c];
+      if (t === TileType.WALL || t === TileType.VOID) continue;
+      if (blockedTiles.has(`${c},${r}`)) continue;
+      ctx.fillRect(offsetX + c * s, offsetY + r * s, s, s);
+    }
+  }
+
+  ctx.restore();
+}
+
 // ── Path indicators ─────────────────────────────────────────────
 
 const PATH_DOT_COLOR = 'rgba(255, 255, 255, 0.5)';
@@ -586,6 +617,8 @@ export function renderFrame(
   layoutCols?: number,
   layoutRows?: number,
   showPathDots?: boolean,
+  showWalkable?: boolean,
+  blockedTiles?: Set<string>,
 ): { offsetX: number; offsetY: number } {
   // Clear
   ctx.clearRect(0, 0, canvasWidth, canvasHeight);
@@ -602,6 +635,11 @@ export function renderFrame(
 
   // Draw tiles (floor + wall base color)
   renderTileGrid(ctx, tileMap, offsetX, offsetY, zoom, tileColors, layoutCols);
+
+  // Walkable tile overlay (on top of floor, below everything else)
+  if (showWalkable && blockedTiles) {
+    renderWalkableOverlay(ctx, tileMap, blockedTiles, offsetX, offsetY, zoom);
+  }
 
   // Seat indicators (below furniture/characters, on top of floor)
   if (selection) {
