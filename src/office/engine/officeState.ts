@@ -11,6 +11,8 @@ import {
   INACTIVE_SEAT_TIMER_RANGE_SEC,
   PALETTE_COUNT,
   WAITING_BUBBLE_DURATION_SEC,
+  WANDER_PAUSE_MAX_SEC,
+  WANDER_PAUSE_MIN_SEC,
 } from '../../constants.js';
 import { getCatalogEntry, getOnStateType } from '../layout/furnitureCatalog.js';
 import {
@@ -146,6 +148,10 @@ const SOCIAL_PHRASES = [
   '잠깐 쉬어가도 괜찮아요',
   '지금 페이스 좋네요',
 ] as const;
+const BLOCKED_REROUTE_MAX_SEC = 30;
+const BLOCKED_REROUTE_MIN_DISTANCE = 2;
+const BLOCKED_REROUTE_MAX_DISTANCE = 6;
+const BLOCKED_REROUTE_CANDIDATE_LIMIT = 24;
 
 export class OfficeState {
   layout: OfficeLayout;
@@ -832,6 +838,13 @@ export class OfficeState {
         updateCharacter(ch, dt, this.walkableTiles, this.seats, this.tileMap, this.blockedTiles, occupiedTiles),
       );
 
+      if (
+        ch.state === CharacterState.WALK &&
+        ch.blockedMoveTimer >= getBlockedRerouteThreshold(ch.patience)
+      ) {
+        this.rerouteBlockedCharacter(ch, occupiedTiles);
+      }
+
       // Tick bubble timer for waiting bubbles
       if (ch.bubbleType === 'waiting') {
         ch.bubbleTimer -= dt;
@@ -918,6 +931,73 @@ export class OfficeState {
     ch.frameTimer = 0;
   }
 
+  private rerouteBlockedCharacter(ch: Character, occupiedTiles: Set<string>): void {
+    const originalDestination = ch.path[ch.path.length - 1] ?? null;
+    const alternatePath = this.findAlternatePathForBlockedCharacter(ch, occupiedTiles, originalDestination);
+
+    ch.blockedMoveTimer = 0;
+
+    if (!alternatePath) {
+      ch.path = [];
+      ch.moveProgress = 0;
+      ch.state = CharacterState.IDLE;
+      ch.frame = 0;
+      ch.frameTimer = 0;
+      ch.wanderTimer = randomRange(WANDER_PAUSE_MIN_SEC, WANDER_PAUSE_MAX_SEC);
+      return;
+    }
+
+    ch.path = alternatePath;
+    ch.moveProgress = 0;
+    ch.state = CharacterState.WALK;
+    ch.dir = directionBetween(ch.tileCol, ch.tileRow, alternatePath[0].col, alternatePath[0].row);
+    ch.frame = 0;
+    ch.frameTimer = 0;
+  }
+
+  private findAlternatePathForBlockedCharacter(
+    ch: Character,
+    occupiedTiles: Set<string>,
+    originalDestination: { col: number; row: number } | null,
+  ): Array<{ col: number; row: number }> | null {
+    const candidates = shuffle(
+      this.walkableTiles.filter((tile) => {
+        const key = `${tile.col},${tile.row}`;
+        if (key === `${ch.tileCol},${ch.tileRow}`) return false;
+        if (occupiedTiles.has(key)) return false;
+        if (
+          originalDestination &&
+          tile.col === originalDestination.col &&
+          tile.row === originalDestination.row
+        ) {
+          return false;
+        }
+
+        const distance = Math.abs(tile.col - ch.tileCol) + Math.abs(tile.row - ch.tileRow);
+        return distance >= BLOCKED_REROUTE_MIN_DISTANCE && distance <= BLOCKED_REROUTE_MAX_DISTANCE;
+      }),
+    ).slice(0, BLOCKED_REROUTE_CANDIDATE_LIMIT);
+
+    for (const candidate of candidates) {
+      const path = this.withOwnSeatUnblocked(ch, () =>
+        findPath(
+          ch.tileCol,
+          ch.tileRow,
+          candidate.col,
+          candidate.row,
+          this.tileMap,
+          this.blockedTiles,
+          { startDir: ch.dir, turnPreference: ch.turnPreference },
+        ),
+      );
+      if (path.length > 0) {
+        return path;
+      }
+    }
+
+    return null;
+  }
+
   private findNearestCharacter(source: Character, maxDistance: number): Character | null {
     let best: Character | null = null;
     let bestDistance = Infinity;
@@ -1001,10 +1081,24 @@ export class OfficeState {
   }
 }
 
+function getBlockedRerouteThreshold(patience: number): number {
+  const normalized = Math.max(0, Math.min(100, patience)) / 100;
+  return normalized * BLOCKED_REROUTE_MAX_SEC;
+}
+
 function randomRange(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
 function randomItem<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)];
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }

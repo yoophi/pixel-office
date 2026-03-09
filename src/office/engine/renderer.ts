@@ -677,7 +677,8 @@ export function renderCharacterInfoBubble(
 
   const line1 = `방향 전환 ${ch.turnPreference}`;
   const line2 = `대화 선호 ${ch.socialPreference}`;
-  const line3 = getTurnPreferenceLabel(ch.turnPreference);
+  const line3 = `참을성 ${ch.patience}`;
+  const line4 = getTurnPreferenceLabel(ch.turnPreference);
   const fontSize = Math.max(10, 5 * zoom);
   const paddingX = 4 * zoom;
   const paddingY = 3 * zoom;
@@ -692,9 +693,10 @@ export function renderCharacterInfoBubble(
     ctx.measureText(line1).width,
     ctx.measureText(line2).width,
     ctx.measureText(line3).width,
+    ctx.measureText(line4).width,
   );
   const bubbleWidth = Math.ceil(textWidth + paddingX * 2);
-  const bubbleHeight = Math.ceil(fontSize * 3 + paddingY * 2 + 3 * zoom);
+  const bubbleHeight = Math.ceil(fontSize * 4 + paddingY * 2 + 4 * zoom);
   const bubbleX = Math.round(offsetX + ch.x * zoom - bubbleWidth / 2);
   const bubbleY = Math.round(
     offsetY +
@@ -724,6 +726,7 @@ export function renderCharacterInfoBubble(
   ctx.fillText(line1, bubbleX + paddingX, bubbleY + paddingY);
   ctx.fillText(line2, bubbleX + paddingX, bubbleY + paddingY + fontSize + zoom);
   ctx.fillText(line3, bubbleX + paddingX, bubbleY + paddingY + (fontSize + zoom) * 2);
+  ctx.fillText(line4, bubbleX + paddingX, bubbleY + paddingY + (fontSize + zoom) * 3);
   ctx.restore();
 }
 

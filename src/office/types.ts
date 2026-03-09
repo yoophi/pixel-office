@@ -167,6 +167,8 @@ export interface Character {
   turnPreference: number;
   /** 1-100 personality score: high values like talking to nearby people. */
   socialPreference: number;
+  /** 0-100 personality score: high values tolerate blocked movement longer. */
+  patience: number;
   /** Animation frame index */
   frame: number;
   /** Time accumulator for animation */
@@ -191,6 +193,8 @@ export interface Character {
   socialBubbleTimer: number;
   /** Cooldown until the character tries another nearby social action. */
   socialActionTimer: number;
+  /** Time spent blocked by another character while trying to enter the next tile. */
+  blockedMoveTimer: number;
   /** Timer to stay seated while inactive after seat reassignment (counts down to 0) */
   seatTimer: number;
   /** Whether this character represents a sub-agent (spawned by Task tool) */
