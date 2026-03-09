@@ -557,6 +557,61 @@ export function renderBubbles(
   }
 }
 
+export function renderSocialBubbles(
+  ctx: CanvasRenderingContext2D,
+  characters: Character[],
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+): void {
+  const fontSize = Math.max(10, 5 * zoom);
+  const paddingX = 4 * zoom;
+  const paddingY = 3 * zoom;
+  const tailSize = 3 * zoom;
+
+  ctx.save();
+  ctx.font = `${fontSize}px monospace`;
+  ctx.textBaseline = 'top';
+
+  for (const ch of characters) {
+    if (ch.bubbleType || !ch.socialBubbleText || ch.socialBubbleTimer <= 0) continue;
+
+    const sittingOff = ch.state === CharacterState.TYPE ? BUBBLE_SITTING_OFFSET_PX : 0;
+    const textWidth = ctx.measureText(ch.socialBubbleText).width;
+    const bubbleWidth = Math.ceil(textWidth + paddingX * 2);
+    const bubbleHeight = Math.ceil(fontSize + paddingY * 2);
+    const bubbleX = Math.round(offsetX + ch.x * zoom - bubbleWidth / 2);
+    const bubbleY = Math.round(
+      offsetY +
+        (ch.y + sittingOff - BUBBLE_VERTICAL_OFFSET_PX) * zoom -
+        bubbleHeight -
+        tailSize -
+        2 * zoom,
+    );
+    const tailX = Math.round(offsetX + ch.x * zoom);
+    const tailY = bubbleY + bubbleHeight;
+
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = Math.max(1, zoom);
+    ctx.fillRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+    ctx.strokeRect(bubbleX + 0.5, bubbleY + 0.5, bubbleWidth - 1, bubbleHeight - 1);
+
+    ctx.beginPath();
+    ctx.moveTo(tailX - tailSize, tailY);
+    ctx.lineTo(tailX, tailY + tailSize);
+    ctx.lineTo(tailX + tailSize, tailY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillText(ch.socialBubbleText, bubbleX + paddingX, bubbleY + paddingY);
+  }
+
+  ctx.restore();
+}
+
 export interface ButtonBounds {
   /** Center X in device pixels */
   cx: number;
@@ -621,7 +676,8 @@ export function renderCharacterInfoBubble(
   if (!ch) return;
 
   const line1 = `방향 전환 ${ch.turnPreference}`;
-  const line2 = getTurnPreferenceLabel(ch.turnPreference);
+  const line2 = `대화 선호 ${ch.socialPreference}`;
+  const line3 = getTurnPreferenceLabel(ch.turnPreference);
   const fontSize = Math.max(10, 5 * zoom);
   const paddingX = 4 * zoom;
   const paddingY = 3 * zoom;
@@ -632,9 +688,13 @@ export function renderCharacterInfoBubble(
   ctx.font = `${fontSize}px monospace`;
   ctx.textBaseline = 'top';
 
-  const textWidth = Math.max(ctx.measureText(line1).width, ctx.measureText(line2).width);
+  const textWidth = Math.max(
+    ctx.measureText(line1).width,
+    ctx.measureText(line2).width,
+    ctx.measureText(line3).width,
+  );
   const bubbleWidth = Math.ceil(textWidth + paddingX * 2);
-  const bubbleHeight = Math.ceil(fontSize * 2 + paddingY * 2 + 2 * zoom);
+  const bubbleHeight = Math.ceil(fontSize * 3 + paddingY * 2 + 3 * zoom);
   const bubbleX = Math.round(offsetX + ch.x * zoom - bubbleWidth / 2);
   const bubbleY = Math.round(
     offsetY +
@@ -663,6 +723,7 @@ export function renderCharacterInfoBubble(
   ctx.fillStyle = '#1a1a1a';
   ctx.fillText(line1, bubbleX + paddingX, bubbleY + paddingY);
   ctx.fillText(line2, bubbleX + paddingX, bubbleY + paddingY + fontSize + zoom);
+  ctx.fillText(line3, bubbleX + paddingX, bubbleY + paddingY + (fontSize + zoom) * 2);
   ctx.restore();
 }
 
@@ -736,6 +797,7 @@ export function renderFrame(
 
   // Speech bubbles (always on top of characters)
   renderBubbles(ctx, characters, offsetX, offsetY, zoom);
+  renderSocialBubbles(ctx, characters, offsetX, offsetY, zoom);
   if (selection) {
     renderCharacterInfoBubble(ctx, selection, offsetX, offsetY, zoom);
   }

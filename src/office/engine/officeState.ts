@@ -33,6 +33,120 @@ import { CharacterState, Direction, MATRIX_EFFECT_DURATION, TILE_SIZE } from '..
 import { createCharacter, directionBetween, updateCharacter } from './characters.js';
 import { matrixEffectSeeds } from './matrixEffect.js';
 
+const SOCIAL_LOOK_RADIUS = 4;
+const SOCIAL_WALK_RADIUS = 6;
+const SOCIAL_BUBBLE_MIN_SEC = 1.8;
+const SOCIAL_BUBBLE_MAX_SEC = 3.2;
+const SOCIAL_ACTION_MIN_SEC = 1.6;
+const SOCIAL_ACTION_MAX_SEC = 4.2;
+const SOCIAL_PHRASES = [
+  '안녕하세요',
+  '좋은 아침이에요',
+  '좋은 오후예요',
+  '좋은 저녁이에요',
+  '반가워요',
+  '오늘 컨디션 어떠세요',
+  '커피 한 잔 하셨나요',
+  '오늘도 힘내봐요',
+  '날씨가 좋아요',
+  '날씨가 참 포근하네요',
+  '바람이 시원하네요',
+  '햇살이 좋네요',
+  '비 오는 날도 나쁘지 않죠',
+  '점심은 드셨어요',
+  '저녁 메뉴는 정하셨어요',
+  '오늘 일정이 빡빡하네요',
+  '일은 잘 되시나요?',
+  '집중이 잘 되는 날이네요',
+  '좋은 하루네요',
+  '주말 계획 있으세요',
+  '어제 푹 쉬셨어요',
+  '오늘 유난히 바빠 보이네요',
+  '도움 필요한 거 있으세요',
+  '지금 하시는 일 멋져 보여요',
+  '키보드 소리가 리듬감 있네요',
+  '화면에 좋은 일이 가득해 보이네요',
+  '오늘은 왠지 잘 풀릴 것 같아요',
+  '웃을 일 하나쯤 생기면 좋겠네요',
+  '잠깐 스트레칭 하실래요',
+  '물 한 잔 챙겨 드세요',
+  '회의는 무사히 끝나길 바라요',
+  '버그가 오늘은 얌전했으면 좋겠네요',
+  '커밋이 착하게 쌓이길',
+  '빌드가 한 번에 되면 행복하죠',
+  '테스트 초록불 보면 기분 좋아요',
+  '배포 버튼은 늘 떨려요',
+  '오늘은 경고창도 예의 바르네요',
+  '에러 로그가 짧으면 감동이에요',
+  '이슈가 이슈를 부르지 않으면 좋겠어요',
+  '문제가 생겨도 침착하면 반은 해결이죠',
+  '마우스도 오늘은 열심히 일하네요',
+  '모니터가 반짝반짝하네요',
+  '책상이 꽤 정돈돼 보이네요',
+  '의자가 오늘따라 편해 보이네요',
+  '식물도 응원하는 것 같아요',
+  '화이트보드가 뭔가 기대에 차 있어요',
+  '쿨러 물이 유난히 시원해 보이네요',
+  '램프가 분위기를 살려주네요',
+  '오늘은 문서도 말을 잘 듣겠죠',
+  '코드가 스스로 정리되면 좋겠네요',
+  '주석이 친절하면 마음이 놓여요',
+  '변수명이 멋지면 하루가 편해요',
+  '함수도 쉬는 시간이 필요하겠죠',
+  '리팩터링은 늘 용기가 필요해요',
+  '이름 짓기가 제일 어려운 일 같아요',
+  '컴퓨터도 가끔 칭찬이 필요하대요',
+  '오늘은 인터넷도 협조적이네요',
+  '마감은 늘 달리기 같아요',
+  '천천히 해도 결국 도착하더라고요',
+  '급할수록 저장부터 하는 편이에요',
+  '자동 저장은 현대의 축복이죠',
+  '브랜치 이름 정하는 데도 감각이 필요해요',
+  'PR 제목이 깔끔하면 뿌듯하죠',
+  '리뷰 코멘트가 짧으면 살짝 불안해요',
+  '머지 버튼은 늘 묵직하네요',
+  '충돌 없는 리베이스는 선물 같아요',
+  '디버깅은 숨은그림찾기 같아요',
+  '가끔은 재시작이 답이더라고요',
+  '문제는 늘 예상 밖에서 등장하죠',
+  '그래도 해결되면 다 추억이죠',
+  '오늘은 행운이 로그에 찍히면 좋겠어요',
+  '작은 성공도 꽤 큰 힘이 되죠',
+  '한 줄 해결이 제일 통쾌해요',
+  '근데 그 한 줄 찾기가 어렵죠',
+  '커피가 코드를 직접 짜주면 좋겠네요',
+  '의자가 회전하면 아이디어도 돌까요',
+  '키보드가 박수쳐 주면 좋겠어요',
+  '모니터가 고개 끄덕이는 기분이에요',
+  '마우스가 오늘은 길을 잘 아네요',
+  '버그도 관심을 받으면 떠날까요',
+  '에러 메시지가 시를 쓰는 날도 있죠',
+  '회의실 공기도 긴장한 것 같아요',
+  '점심 메뉴 고르기가 알고리즘보다 어려워요',
+  '복붙이 너무 완벽하면 조금 무서워요',
+  '비밀번호는 늘 저를 시험하네요',
+  '탭과 스페이스는 아직도 토론 중이래요',
+  '주석이 미래의 나를 구하곤 하죠',
+  '미래의 나는 늘 현재의 나를 찾더라고요',
+  '컴파일러가 오늘은 너그럽길 바라요',
+  '캐시를 지우면 마음도 비워지는 느낌이에요',
+  '문제가 사라지면 내가 잘한 건지 헷갈리죠',
+  '사소한 버그가 제일 기억에 남아요',
+  '스크롤이 끝이 없으면 살짝 철학적이 돼요',
+  '와이파이가 잠깐 쉬고 싶어 하나 봐요',
+  '오늘은 알림도 조용해서 좋네요',
+  '가끔 침묵이 최고의 디버거 같아요',
+  '좋은 질문은 절반의 해결책이죠',
+  '설명하다 보면 답이 나오기도 하죠',
+  '생각보다 잘하고 계신 것 같아요',
+  '조금만 더 하면 끝이 보일 것 같아요',
+  '이따가 산책 한 번 어떠세요',
+  '오늘도 무사 완료를 기원합니다',
+  '웃으면서 끝내면 그게 제일 좋죠',
+  '잠깐 쉬어가도 괜찮아요',
+  '지금 페이스 좋네요',
+] as const;
+
 export class OfficeState {
   layout: OfficeLayout;
   tileMap: TileTypeVal[][];
@@ -668,7 +782,7 @@ export class OfficeState {
   /** Dismiss bubble on click — permission: instant, waiting: quick fade */
   dismissBubble(id: number): void {
     const ch = this.characters.get(id);
-    if (!ch || !ch.bubbleType) return;
+    if (!ch) return;
     if (ch.bubbleType === 'permission') {
       ch.bubbleType = null;
       ch.bubbleTimer = 0;
@@ -676,6 +790,8 @@ export class OfficeState {
       // Trigger immediate fade (0.3s remaining)
       ch.bubbleTimer = Math.min(ch.bubbleTimer, DISMISS_BUBBLE_FAST_FADE_SEC);
     }
+    ch.socialBubbleText = null;
+    ch.socialBubbleTimer = 0;
   }
 
   update(dt: number): void {
@@ -724,11 +840,139 @@ export class OfficeState {
           ch.bubbleTimer = 0;
         }
       }
+
+      if (ch.socialBubbleTimer > 0) {
+        ch.socialBubbleTimer -= dt;
+        if (ch.socialBubbleTimer <= 0) {
+          ch.socialBubbleText = null;
+          ch.socialBubbleTimer = 0;
+        }
+      }
+
+      this.updateSocialBehavior(ch, dt, occupiedTiles);
     }
     // Remove characters that finished despawn
     for (const id of toDelete) {
       this.characters.delete(id);
     }
+  }
+
+  private updateSocialBehavior(ch: Character, dt: number, occupiedTiles: Set<string>): void {
+    if (ch.isSubagent) return;
+
+    const nearby = this.findNearestCharacter(ch, SOCIAL_LOOK_RADIUS);
+    if (!nearby) {
+      return;
+    }
+
+    if (ch.state !== CharacterState.WALK) {
+      ch.dir = directionBetween(ch.tileCol, ch.tileRow, nearby.tileCol, nearby.tileRow);
+    }
+
+    ch.socialActionTimer -= dt;
+    if (ch.socialActionTimer > 0) {
+      return;
+    }
+    ch.socialActionTimer = randomRange(SOCIAL_ACTION_MIN_SEC, SOCIAL_ACTION_MAX_SEC);
+
+    const socialBias = ch.socialPreference / 100;
+    if (!ch.bubbleType && Math.random() < 0.12 + socialBias * 0.45) {
+      ch.socialBubbleText = randomItem(SOCIAL_PHRASES);
+      ch.socialBubbleTimer = randomRange(SOCIAL_BUBBLE_MIN_SEC, SOCIAL_BUBBLE_MAX_SEC);
+    }
+
+    if (ch.state !== CharacterState.IDLE || ch.moveProgress > 0 || socialBias < 0.55) {
+      return;
+    }
+
+    const walkTarget = this.findSocialWalkTarget(ch, nearby, occupiedTiles);
+    if (!walkTarget) {
+      return;
+    }
+
+    const walkChance = 0.05 + socialBias * 0.3;
+    if (Math.random() >= walkChance) {
+      return;
+    }
+
+    const path = this.withOwnSeatUnblocked(ch, () =>
+      findPath(
+        ch.tileCol,
+        ch.tileRow,
+        walkTarget.col,
+        walkTarget.row,
+        this.tileMap,
+        this.blockedTiles,
+        { startDir: ch.dir, turnPreference: ch.turnPreference },
+      ),
+    );
+    if (path.length === 0) {
+      return;
+    }
+
+    ch.path = path;
+    ch.moveProgress = 0;
+    ch.state = CharacterState.WALK;
+    ch.dir = directionBetween(ch.tileCol, ch.tileRow, path[0].col, path[0].row);
+    ch.frame = 0;
+    ch.frameTimer = 0;
+  }
+
+  private findNearestCharacter(source: Character, maxDistance: number): Character | null {
+    let best: Character | null = null;
+    let bestDistance = Infinity;
+    for (const candidate of this.characters.values()) {
+      if (candidate.id === source.id) continue;
+      if (candidate.matrixEffect) continue;
+
+      const distance =
+        Math.abs(candidate.tileCol - source.tileCol) + Math.abs(candidate.tileRow - source.tileRow);
+      if (distance === 0 || distance > maxDistance || distance >= bestDistance) {
+        continue;
+      }
+      best = candidate;
+      bestDistance = distance;
+    }
+    return best;
+  }
+
+  private findSocialWalkTarget(
+    source: Character,
+    target: Character,
+    occupiedTiles: Set<string>,
+  ): { col: number; row: number } | null {
+    const distance =
+      Math.abs(target.tileCol - source.tileCol) + Math.abs(target.tileRow - source.tileRow);
+    if (distance <= 1 || distance > SOCIAL_WALK_RADIUS) {
+      return null;
+    }
+
+    const candidates = [
+      { col: target.tileCol, row: target.tileRow - 1 },
+      { col: target.tileCol + 1, row: target.tileRow },
+      { col: target.tileCol, row: target.tileRow + 1 },
+      { col: target.tileCol - 1, row: target.tileRow },
+    ];
+
+    let best: { col: number; row: number } | null = null;
+    let bestDistance = Infinity;
+    for (const candidate of candidates) {
+      const key = `${candidate.col},${candidate.row}`;
+      if (occupiedTiles.has(key)) continue;
+      if (!isWalkable(candidate.col, candidate.row, this.tileMap, this.blockedTiles)) {
+        const ownSeatKey = this.ownSeatKey(source);
+        if (ownSeatKey !== key) continue;
+      }
+
+      const distanceToSource =
+        Math.abs(candidate.col - source.tileCol) + Math.abs(candidate.row - source.tileRow);
+      if (distanceToSource < bestDistance) {
+        best = candidate;
+        bestDistance = distanceToSource;
+      }
+    }
+
+    return best;
   }
 
   getCharacters(): Character[] {
@@ -755,4 +999,12 @@ export class OfficeState {
     }
     return null;
   }
+}
+
+function randomRange(min: number, max: number): number {
+  return min + Math.random() * (max - min);
+}
+
+function randomItem<T>(items: readonly T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
 }

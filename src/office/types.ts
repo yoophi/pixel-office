@@ -165,6 +165,8 @@ export interface Character {
   hueShift: number;
   /** 0-100 personality score: high values enjoy turning, low values prefer straighter movement. */
   turnPreference: number;
+  /** 1-100 personality score: high values like talking to nearby people. */
+  socialPreference: number;
   /** Animation frame index */
   frame: number;
   /** Time accumulator for animation */
@@ -183,6 +185,12 @@ export interface Character {
   bubbleType: 'permission' | 'waiting' | null;
   /** Countdown timer for bubble (waiting: 2→0, permission: unused) */
   bubbleTimer: number;
+  /** Temporary social speech text shown above the character. */
+  socialBubbleText: string | null;
+  /** Countdown timer for the social speech bubble. */
+  socialBubbleTimer: number;
+  /** Cooldown until the character tries another nearby social action. */
+  socialActionTimer: number;
   /** Timer to stay seated while inactive after seat reassignment (counts down to 0) */
   seatTimer: number;
   /** Whether this character represents a sub-agent (spawned by Task tool) */
