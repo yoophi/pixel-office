@@ -70,6 +70,7 @@ export function createCharacter(
     hueShift,
     turnPreference: randomInt(0, 100),
     socialPreference: randomInt(1, 100),
+    patience: randomInt(0, 100),
     frame: 0,
     frameTimer: 0,
     wanderTimer: 0,
@@ -82,6 +83,7 @@ export function createCharacter(
     socialBubbleText: null,
     socialBubbleTimer: 0,
     socialActionTimer: randomRange(1.5, 4.5),
+    blockedMoveTimer: 0,
     seatTimer: 0,
     isSubagent: false,
     parentAgentId: null,
@@ -228,6 +230,7 @@ export function updateCharacter(
 
       if (ch.path.length === 0) {
         // Path complete — snap to tile center and transition
+        ch.blockedMoveTimer = 0;
         const center = tileCenter(ch.tileCol, ch.tileRow);
         ch.x = center.x;
         ch.y = center.y;
@@ -284,8 +287,11 @@ export function updateCharacter(
       // Wait if next tile is occupied by another character
       const nextKey = `${nextTile.col},${nextTile.row}`;
       if (occupiedTiles && occupiedTiles.has(nextKey) && ch.moveProgress === 0) {
+        ch.blockedMoveTimer += dt;
         break;
       }
+
+      ch.blockedMoveTimer = 0;
 
       ch.moveProgress += (WALK_SPEED_PX_PER_SEC / TILE_SIZE) * dt;
 
