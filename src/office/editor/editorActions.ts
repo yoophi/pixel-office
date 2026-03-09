@@ -126,6 +126,7 @@ export function canPlaceFurniture(
 ): boolean {
   const entry = getCatalogEntry(type);
   if (!entry) return false;
+  const floorRows = getFloorRows(entry.footprintH, entry.floorTiles);
 
   // Check bounds — wall items may extend above the map (top rows hang above the wall)
   if (entry.canPlaceOnWalls) {
@@ -154,8 +155,6 @@ export function canPlaceFurniture(
   for (let dr = 0; dr < entry.footprintH; dr++) {
     if (dr < bgRows) continue;
     if (row + dr < 0) continue; // row above map (wall items extending upward)
-    // Wall items: only the bottom row must be on wall tiles; upper rows can overlap VOID/anything
-    if (entry.canPlaceOnWalls && dr < entry.footprintH - 1) continue;
     for (let dc = 0; dc < entry.footprintW; dc++) {
       const idx = (row + dr) * layout.cols + (col + dc);
       const tileVal = layout.tiles[idx];
@@ -163,7 +162,10 @@ export function canPlaceFurniture(
         if (tileVal !== TileType.WALL) return false;
       } else {
         if (tileVal === TileType.VOID) return false; // Cannot place on VOID
-        if (tileVal === TileType.WALL) return false; // Normal items cannot overlap walls
+        const isFloorRow = dr >= entry.footprintH - floorRows;
+        if (isFloorRow) {
+          if (tileVal === TileType.WALL) return false; // Furniture floor must stand on floor tiles
+        }
       }
     }
   }
@@ -199,6 +201,11 @@ export function canPlaceFurniture(
   }
 
   return true;
+}
+
+function getFloorRows(footprintH: number, floorTiles?: number): number {
+  if (floorTiles === undefined) return footprintH;
+  return Math.max(0, Math.min(footprintH, floorTiles));
 }
 
 export type ExpandDirection = 'left' | 'right' | 'up' | 'down';
