@@ -143,6 +143,7 @@ export function updateCharacter(
             seat.seatRow,
             tileMap,
             blockedTiles,
+            { startDir: ch.dir, turnPreference: ch.turnPreference },
           );
           if (path.length > 0) {
             ch.path = path;
@@ -175,6 +176,7 @@ export function updateCharacter(
               seat.seatRow,
               tileMap,
               blockedTiles,
+              { startDir: ch.dir, turnPreference: ch.turnPreference },
             );
             if (path.length > 0) {
               ch.path = path;
@@ -196,6 +198,7 @@ export function updateCharacter(
             target.row,
             tileMap,
             blockedTiles,
+            { startDir: ch.dir, turnPreference: ch.turnPreference },
           );
           if (path.length > 0) {
             ch.path = path;
@@ -311,6 +314,7 @@ export function updateCharacter(
               seat.seatRow,
               tileMap,
               blockedTiles,
+              { startDir: ch.dir, turnPreference: ch.turnPreference },
             );
             if (newPath.length > 0) {
               ch.path = newPath;

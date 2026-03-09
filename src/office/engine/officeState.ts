@@ -309,7 +309,10 @@ export class OfficeState {
     ch.seatId = seatId;
     // Pathfind to new seat (unblock own seat tile for this query)
     const path = this.withOwnSeatUnblocked(ch, () =>
-      findPath(ch.tileCol, ch.tileRow, seat.seatCol, seat.seatRow, this.tileMap, this.blockedTiles),
+      findPath(ch.tileCol, ch.tileRow, seat.seatCol, seat.seatRow, this.tileMap, this.blockedTiles, {
+        startDir: ch.dir,
+        turnPreference: ch.turnPreference,
+      }),
     );
     if (path.length > 0) {
       ch.path = path;
@@ -337,7 +340,10 @@ export class OfficeState {
     const seat = this.seats.get(ch.seatId);
     if (!seat) return;
     const path = this.withOwnSeatUnblocked(ch, () =>
-      findPath(ch.tileCol, ch.tileRow, seat.seatCol, seat.seatRow, this.tileMap, this.blockedTiles),
+      findPath(ch.tileCol, ch.tileRow, seat.seatCol, seat.seatRow, this.tileMap, this.blockedTiles, {
+        startDir: ch.dir,
+        turnPreference: ch.turnPreference,
+      }),
     );
     if (path.length > 0) {
       ch.path = path;
@@ -368,7 +374,10 @@ export class OfficeState {
       if (!key || key !== `${col},${row}`) return false;
     }
     const path = this.withOwnSeatUnblocked(ch, () =>
-      findPath(ch.tileCol, ch.tileRow, col, row, this.tileMap, this.blockedTiles),
+      findPath(ch.tileCol, ch.tileRow, col, row, this.tileMap, this.blockedTiles, {
+        startDir: ch.dir,
+        turnPreference: ch.turnPreference,
+      }),
     );
     if (path.length === 0) return false;
     ch.path = path;
