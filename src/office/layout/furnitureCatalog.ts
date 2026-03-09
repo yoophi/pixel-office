@@ -55,6 +55,7 @@ export const FURNITURE_CATALOG: CatalogEntryWithCategory[] = [
     sprite: DESK_SQUARE_SPRITE,
     isDesk: true,
     category: 'desks',
+    floorTiles: 1,
   },
   {
     type: FurnitureType.BOOKSHELF,
@@ -74,6 +75,7 @@ export const FURNITURE_CATALOG: CatalogEntryWithCategory[] = [
     sprite: PLANT_SPRITE,
     isDesk: false,
     category: 'decor',
+    canPlaceOnSurfaces: true,
   },
   {
     type: FurnitureType.COOLER,
@@ -83,6 +85,7 @@ export const FURNITURE_CATALOG: CatalogEntryWithCategory[] = [
     sprite: COOLER_SPRITE,
     isDesk: false,
     category: 'misc',
+    canPlaceOnSurfaces: true,
   },
   {
     type: FurnitureType.WHITEBOARD,
@@ -177,7 +180,7 @@ export function buildDynamicCatalog(assets: LoadedAssetData): boolean {
         isDesk: asset.isDesk,
         category: asset.category as FurnitureCategory,
         ...(asset.orientation ? { orientation: asset.orientation } : {}),
-        ...(asset.canPlaceOnSurfaces ? { canPlaceOnSurfaces: true } : {}),
+        ...(isSurfacePlaceableAsset(asset) ? { canPlaceOnSurfaces: true } : {}),
         ...(asset.backgroundTiles ? { backgroundTiles: asset.backgroundTiles } : {}),
         ...(asset.floorTiles !== undefined ? { floorTiles: asset.floorTiles } : {}),
         ...(asset.canPlaceOnWalls ? { canPlaceOnWalls: true } : {}),
@@ -386,4 +389,11 @@ export function getOffStateType(currentType: string): string {
 /** Returns true if the given furniture type is part of a rotation group. */
 export function isRotatable(type: string): boolean {
   return rotationGroups.has(type);
+}
+
+function isSurfacePlaceableAsset(asset: LoadedAssetData['catalog'][number]): boolean {
+  if (asset.canPlaceOnSurfaces) return true;
+  if (asset.isDesk || asset.canPlaceOnWalls) return false;
+  if (asset.category === 'chairs') return false;
+  return asset.footprintW === 1 && asset.footprintH === 1;
 }
