@@ -128,6 +128,23 @@ export function canPlaceFurniture(
   if (!entry) return false;
   const floorRows = getFloorRows(entry.footprintH, entry.floorTiles);
 
+  // If this item can be placed on surfaces, build set of desk tiles to exclude from
+  // wall/floor and collision checks.
+  let deskTiles: Set<string> | null = null;
+  if (entry.canPlaceOnSurfaces) {
+    deskTiles = new Set<string>();
+    for (const item of layout.furniture) {
+      if (item.uid === excludeUid) continue;
+      const itemEntry = getCatalogEntry(item.type);
+      if (!itemEntry || !itemEntry.isDesk) continue;
+      for (let dr = 0; dr < itemEntry.footprintH; dr++) {
+        for (let dc = 0; dc < itemEntry.footprintW; dc++) {
+          deskTiles.add(`${item.col + dc},${item.row + dr}`);
+        }
+      }
+    }
+  }
+
   // Check bounds — wall items may extend above the map (top rows hang above the wall)
   if (entry.canPlaceOnWalls) {
     const bottomRow = row + entry.footprintH - 1;
@@ -156,15 +173,17 @@ export function canPlaceFurniture(
     if (dr < bgRows) continue;
     if (row + dr < 0) continue; // row above map (wall items extending upward)
     for (let dc = 0; dc < entry.footprintW; dc++) {
+      const key = `${col + dc},${row + dr}`;
+      const isOnDeskSurface = deskTiles?.has(key) ?? false;
       const idx = (row + dr) * layout.cols + (col + dc);
       const tileVal = layout.tiles[idx];
       if (entry.canPlaceOnWalls) {
         if (tileVal !== TileType.WALL) return false;
       } else {
-        if (tileVal === TileType.VOID) return false; // Cannot place on VOID
+        if (tileVal === TileType.VOID && !isOnDeskSurface) return false; // Cannot place on VOID
         const isFloorRow = dr >= entry.footprintH - floorRows;
         if (isFloorRow) {
-          if (tileVal === TileType.WALL) return false; // Furniture floor must stand on floor tiles
+          if (tileVal === TileType.WALL && !isOnDeskSurface) return false;
         }
       }
     }
@@ -172,22 +191,6 @@ export function canPlaceFurniture(
 
   // Build occupied set excluding the item being moved, skipping background tile rows
   const occupied = getPlacementBlockedTiles(layout.furniture, excludeUid);
-
-  // If this item can be placed on surfaces, build set of desk tiles to exclude from collision
-  let deskTiles: Set<string> | null = null;
-  if (entry.canPlaceOnSurfaces) {
-    deskTiles = new Set<string>();
-    for (const item of layout.furniture) {
-      if (item.uid === excludeUid) continue;
-      const itemEntry = getCatalogEntry(item.type);
-      if (!itemEntry || !itemEntry.isDesk) continue;
-      for (let dr = 0; dr < itemEntry.footprintH; dr++) {
-        for (let dc = 0; dc < itemEntry.footprintW; dc++) {
-          deskTiles.add(`${item.col + dc},${item.row + dr}`);
-        }
-      }
-    }
-  }
 
   // Check overlap — also skip the NEW item's own background rows
   const newBgRows = entry.backgroundTiles || 0;
