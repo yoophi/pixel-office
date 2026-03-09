@@ -380,6 +380,39 @@ export class OfficeState {
     return true;
   }
 
+  /** Move an agent one tile in the given direction (WASD).
+   *  Clears seat assignment and destination path. */
+  moveOneStep(agentId: number, dir: Direction): boolean {
+    const ch = this.characters.get(agentId);
+    if (!ch || ch.isSubagent) return false;
+    // If currently mid-move, ignore
+    if (ch.state === CharacterState.WALK && ch.moveProgress > 0) return false;
+
+    const dc = dir === Direction.LEFT ? -1 : dir === Direction.RIGHT ? 1 : 0;
+    const dr = dir === Direction.UP ? -1 : dir === Direction.DOWN ? 1 : 0;
+    const targetCol = ch.tileCol + dc;
+    const targetRow = ch.tileRow + dr;
+
+    if (!isWalkable(targetCol, targetRow, this.tileMap, this.blockedTiles)) return false;
+
+    // Free seat assignment
+    if (ch.seatId) {
+      const seat = this.seats.get(ch.seatId);
+      if (seat) seat.assigned = false;
+      ch.seatId = null;
+    }
+
+    // Clear any existing path/destination
+    ch.path = [{ col: targetCol, row: targetRow }];
+    ch.moveProgress = 0;
+    ch.state = CharacterState.WALK;
+    ch.dir = dir;
+    ch.isActive = false;
+    ch.frame = 0;
+    ch.frameTimer = 0;
+    return true;
+  }
+
   /** Create a sub-agent character with the parent's palette. Returns the sub-agent ID. */
   addSubagent(parentAgentId: number, parentToolId: string): number {
     const key = `${parentAgentId}:${parentToolId}`;

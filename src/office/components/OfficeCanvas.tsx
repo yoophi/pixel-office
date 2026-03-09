@@ -22,7 +22,7 @@ import type {
 } from '../engine/renderer.js';
 import { renderFrame } from '../engine/renderer.js';
 import { getCatalogEntry, isRotatable } from '../layout/furnitureCatalog.js';
-import { EditTool, TILE_SIZE } from '../types.js';
+import { Direction, EditTool, TILE_SIZE } from '../types.js';
 
 interface OfficeCanvasProps {
   officeState: OfficeState;
@@ -759,6 +759,30 @@ export function OfficeCanvas({
     },
     [isEditMode, officeState, screenToTile],
   );
+
+  // WASD movement for selected agent
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isEditMode) return;
+      if (officeState.selectedAgentId === null) return;
+      // Ignore if user is typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      let dir: Direction | null = null;
+      switch (e.key.toLowerCase()) {
+        case 'w': dir = Direction.UP; break;
+        case 'a': dir = Direction.LEFT; break;
+        case 's': dir = Direction.DOWN; break;
+        case 'd': dir = Direction.RIGHT; break;
+      }
+      if (dir === null) return;
+      e.preventDefault();
+      officeState.moveOneStep(officeState.selectedAgentId, dir);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [officeState, isEditMode]);
 
   // Wheel: Ctrl+wheel to zoom, plain wheel/trackpad to pan
   const handleWheel = useCallback(
