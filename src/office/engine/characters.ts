@@ -68,6 +68,7 @@ export function createCharacter(
     currentTool: null,
     palette,
     hueShift,
+    turnPreference: randomInt(0, 100),
     frame: 0,
     frameTimer: 0,
     wanderTimer: 0,

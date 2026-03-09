@@ -35,6 +35,7 @@ function getOfficeState(): OfficeState {
 function App() {
   const officeState = getOfficeState();
   const [uiTick, setUiTick] = useState(0);
+  const [showCharacterInfo, setShowCharacterInfo] = useState(true);
   const [showPathDots, setShowPathDots] = useState(true);
   const [showWalkable, setShowWalkable] = useState(false);
   const editor = useLocalEditorActions(getOfficeState, editorState, LAYOUT_STORAGE_KEY);
@@ -153,6 +154,14 @@ function App() {
           <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input
               type="checkbox"
+              checked={showCharacterInfo}
+              onChange={(e) => setShowCharacterInfo(e.target.checked)}
+            />
+            Show character info
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
               checked={showPathDots}
               onChange={(e) => setShowPathDots(e.target.checked)}
             />
@@ -214,6 +223,7 @@ function App() {
           zoom={editor.zoom}
           onZoomChange={editor.handleZoomChange}
           panRef={editor.panRef}
+          showCharacterInfo={showCharacterInfo}
           showPathDots={showPathDots}
           showWalkable={showWalkable}
         />

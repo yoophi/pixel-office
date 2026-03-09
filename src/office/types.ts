@@ -163,6 +163,8 @@ export interface Character {
   palette: number;
   /** Hue shift in degrees (0 = no shift, ≥45 for repeated palettes) */
   hueShift: number;
+  /** 0-100 personality score: high values enjoy turning, low values prefer straighter movement. */
+  turnPreference: number;
   /** Animation frame index */
   frame: number;
   /** Time accumulator for animation */

@@ -599,6 +599,71 @@ export interface SelectionRenderState {
   hoveredTile: { col: number; row: number } | null;
   seats: Map<string, Seat>;
   characters: Map<number, Character>;
+  showCharacterInfo?: boolean;
+}
+
+function getTurnPreferenceLabel(turnPreference: number): string {
+  if (turnPreference >= 67) return '회전 좋아함';
+  if (turnPreference <= 33) return '직진 선호';
+  return '균형형';
+}
+
+export function renderCharacterInfoBubble(
+  ctx: CanvasRenderingContext2D,
+  selection: SelectionRenderState,
+  offsetX: number,
+  offsetY: number,
+  zoom: number,
+): void {
+  if (!selection.showCharacterInfo || selection.selectedAgentId === null) return;
+
+  const ch = selection.characters.get(selection.selectedAgentId);
+  if (!ch) return;
+
+  const line1 = `방향 전환 ${ch.turnPreference}`;
+  const line2 = getTurnPreferenceLabel(ch.turnPreference);
+  const fontSize = Math.max(10, 5 * zoom);
+  const paddingX = 4 * zoom;
+  const paddingY = 3 * zoom;
+  const tailSize = 3 * zoom;
+  const sittingOff = ch.state === CharacterState.TYPE ? BUBBLE_SITTING_OFFSET_PX : 0;
+
+  ctx.save();
+  ctx.font = `${fontSize}px monospace`;
+  ctx.textBaseline = 'top';
+
+  const textWidth = Math.max(ctx.measureText(line1).width, ctx.measureText(line2).width);
+  const bubbleWidth = Math.ceil(textWidth + paddingX * 2);
+  const bubbleHeight = Math.ceil(fontSize * 2 + paddingY * 2 + 2 * zoom);
+  const bubbleX = Math.round(offsetX + ch.x * zoom - bubbleWidth / 2);
+  const bubbleY = Math.round(
+    offsetY +
+      (ch.y + sittingOff - BUBBLE_VERTICAL_OFFSET_PX) * zoom -
+      bubbleHeight -
+      tailSize -
+      2 * zoom,
+  );
+  const tailX = Math.round(offsetX + ch.x * zoom);
+  const tailY = bubbleY + bubbleHeight;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = Math.max(1, zoom);
+  ctx.fillRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+  ctx.strokeRect(bubbleX + 0.5, bubbleY + 0.5, bubbleWidth - 1, bubbleHeight - 1);
+
+  ctx.beginPath();
+  ctx.moveTo(tailX - tailSize, tailY);
+  ctx.lineTo(tailX, tailY + tailSize);
+  ctx.lineTo(tailX + tailSize, tailY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillText(line1, bubbleX + paddingX, bubbleY + paddingY);
+  ctx.fillText(line2, bubbleX + paddingX, bubbleY + paddingY + fontSize + zoom);
+  ctx.restore();
 }
 
 export function renderFrame(
@@ -671,6 +736,9 @@ export function renderFrame(
 
   // Speech bubbles (always on top of characters)
   renderBubbles(ctx, characters, offsetX, offsetY, zoom);
+  if (selection) {
+    renderCharacterInfoBubble(ctx, selection, offsetX, offsetY, zoom);
+  }
 
   // Editor overlays
   if (editor) {
