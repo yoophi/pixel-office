@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 
+import { preloadCharacterAssets } from '../entities/Character.js';
 import { preloadTiledMapAssets } from '../tiled/loader.js';
 
 export const SAMPLE_MAP_KEY = 'sample-office';
@@ -17,6 +18,7 @@ export class BootScene extends Phaser.Scene {
       mapKey: SAMPLE_MAP_KEY,
       mapUrl: SAMPLE_MAP_URL,
     });
+    preloadCharacterAssets(this);
   }
 
   create() {
