@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import * as Phaser from 'phaser';
 
 import { BootScene } from './scenes/BootScene.js';
+import { OfficeScene } from './scenes/OfficeScene.js';
 
 export function PhaserGame() {
   const parentRef = useRef<HTMLDivElement | null>(null);
@@ -24,7 +25,7 @@ export function PhaserGame() {
         pixelArt: true,
         roundPixels: true,
       },
-      scene: [BootScene],
+      scene: [BootScene, OfficeScene],
     });
 
     gameRef.current = game;
