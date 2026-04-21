@@ -4,6 +4,7 @@ import { gameBus, startAgentSync, type AgentSyncController, type Unsubscribe } f
 import type { Agent, AgentId, AgentStatus, GridPoint } from '../../domain/index.js';
 import { Character } from '../entities/Character.js';
 import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
+import { createSeatAssignmentSystemFromTilemap, type SeatAssignmentSystem } from '../systems/SeatAssignmentSystem.js';
 import { createPhaserTilemap } from '../tiled/loader.js';
 import { SAMPLE_MAP_KEY } from './BootScene.js';
 
@@ -24,6 +25,7 @@ export class OfficeScene extends Phaser.Scene {
       mapKey: SAMPLE_MAP_KEY,
     });
     const pathfinding = createPathfindingSystemFromTilemap(map);
+    const seatAssignment = createSeatAssignmentSystemFromTilemap(map);
 
     layers.forEach((layer, index) => {
       layer.setDepth(index);
@@ -51,6 +53,7 @@ export class OfficeScene extends Phaser.Scene {
         characters: this.characters,
         agentTiles: this.agentTiles,
         characterDepth: layers.length,
+        seatAssignment,
         findPath: (start, goal) => pathfinding.findPath(start, goal),
       }),
     );
@@ -77,6 +80,7 @@ interface OfficeSceneAgentControllerConfig {
   characters: Map<AgentId, Character>;
   agentTiles: Map<AgentId, GridPoint>;
   characterDepth: number;
+  seatAssignment: SeatAssignmentSystem;
   findPath(start: GridPoint, goal: GridPoint): PathNode[];
 }
 
@@ -103,11 +107,17 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
       character.setDepth(config.characterDepth);
       config.characters.set(agent.id, character);
       config.agentTiles.set(agent.id, position);
+
+      const seat = config.seatAssignment.assignSeat(agent.id, agent.seatId);
+      if (seat) {
+        moveAgentToPoint(config, agent.id, seat.position, 'typing');
+      }
     },
     removeAgent(agentId) {
       config.characters.get(agentId)?.destroy();
       config.characters.delete(agentId);
       config.agentTiles.delete(agentId);
+      config.seatAssignment.releaseAgent(agentId);
     },
     setAgentStatus(agentId, status) {
       config.characters.get(agentId)?.setStatus(toCharacterStatus(status));
@@ -121,7 +131,11 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
         config.agentTiles.set(agentId, destination);
       });
     },
-    assignSeat() {},
+    assignSeat(agentId, seatId) {
+      const seat = config.seatAssignment.assignSeat(agentId, seatId ?? undefined);
+      if (!seat) return;
+      moveAgentToPoint(config, agentId, seat.position, 'typing');
+    },
     showSpeech(agentId, message, durationMs) {
       const character = config.characters.get(agentId);
       if (!character) return;
@@ -140,6 +154,22 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
   };
 }
 
+function moveAgentToPoint(
+  config: OfficeSceneAgentControllerConfig,
+  agentId: AgentId,
+  destination: GridPoint,
+  finalStatus: Character['status'],
+) {
+  const character = config.characters.get(agentId);
+  const start = config.agentTiles.get(agentId);
+  if (!character || !start) return;
+
+  moveCharacterAlongPath(config.scene, character, config.findPath(start, destination), () => {
+    config.agentTiles.set(agentId, destination);
+    character.setStatus(finalStatus);
+  });
+}
+
 function emitSampleAgentEvents() {
   const now = Date.now();
   const agent: Agent = {
@@ -152,12 +182,6 @@ function emitSampleAgentEvents() {
   };
 
   gameBus.emit('agent:event', { type: 'agent:upsert', agent });
-  gameBus.emit('agent:event', {
-    type: 'agent:move',
-    agentId: agent.id,
-    destination: { x: 16, y: 8 },
-    updatedAt: now + 1,
-  });
   gameBus.emit('agent:event', {
     type: 'agent:say',
     agentId: agent.id,
