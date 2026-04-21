@@ -3,6 +3,7 @@ import * as Phaser from 'phaser';
 import { gameBus, startAgentSync, type AgentSyncController, type Unsubscribe } from '../../bridge/index.js';
 import type { Agent, AgentId, AgentStatus, GridPoint } from '../../domain/index.js';
 import { Character } from '../entities/Character.js';
+import { playMatrixDespawnEffect, playMatrixSpawnEffect } from '../effects/MatrixEffect.js';
 import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
 import { createSeatAssignmentSystemFromTilemap, type SeatAssignmentSystem } from '../systems/SeatAssignmentSystem.js';
 import { SocialSystem } from '../systems/SocialSystem.js';
@@ -124,6 +125,7 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
         status: toCharacterStatus(agent.status),
       });
       character.setDepth(config.characterDepth);
+      playMatrixSpawnEffect(config.scene, character.sprite);
       config.characters.set(agent.id, character);
       config.agentTiles.set(agent.id, position);
 
@@ -133,7 +135,10 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
       }
     },
     removeAgent(agentId) {
-      config.characters.get(agentId)?.destroy();
+      const character = config.characters.get(agentId);
+      if (character) {
+        playMatrixDespawnEffect(config.scene, character.sprite, () => character.destroy());
+      }
       config.characters.delete(agentId);
       config.agentTiles.delete(agentId);
       config.seatAssignment.releaseAgent(agentId);

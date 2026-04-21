@@ -2,6 +2,7 @@ export { PhaserGame } from './PhaserGame.js';
 export { Character, preloadCharacterAssets } from './entities/Character.js';
 export type { CharacterConfig } from './entities/Character.js';
 export { SpeechBubble } from './entities/SpeechBubble.js';
+export { playMatrixDespawnEffect, playMatrixSpawnEffect } from './effects/MatrixEffect.js';
 export { PathfindingSystem, createPathfindingSystemFromTilemap } from './systems/PathfindingSystem.js';
 export type { PathNode } from './systems/PathfindingSystem.js';
 export { SeatAssignmentSystem, createSeatAssignmentSystemFromTilemap } from './systems/SeatAssignmentSystem.js';
