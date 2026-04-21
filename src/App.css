@@ -1,4 +1,5 @@
 .app-shell {
+  position: relative;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -12,4 +13,28 @@
 
 .phaser-host canvas {
   display: block;
+}
+
+.tileset-switcher {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(17, 24, 39, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.tileset-switcher button {
+  border: 0;
+  background: transparent;
+  color: #d1d5db;
+  padding: 7px 10px;
+  font: inherit;
+}
+
+.tileset-switcher button[aria-pressed='true'] {
+  background: #f9fafb;
+  color: #111827;
 }
