@@ -14,17 +14,24 @@ const TARGET_TILE_SIZE = 16;
 export class OfficeScene extends Phaser.Scene {
   private fpsText?: Phaser.GameObjects.Text;
   private agentSyncStop?: Unsubscribe;
+  private tilesetSwitchStop?: Unsubscribe;
   private socialSystem?: SocialSystem;
   private readonly characters = new Map<AgentId, Character>();
   private readonly agentTiles = new Map<AgentId, GridPoint>();
+  private activeVariantId = 'office-warm';
 
   constructor() {
     super('OfficeScene');
   }
 
+  init(data: { variantId?: string }) {
+    this.activeVariantId = data.variantId ?? 'office-warm';
+  }
+
   create() {
     const { map, layers } = createPhaserTilemap(this, {
       mapKey: SAMPLE_MAP_KEY,
+      variantId: this.activeVariantId,
     });
     const pathfinding = createPathfindingSystemFromTilemap(map);
     const seatAssignment = createSeatAssignmentSystemFromTilemap(map);
@@ -63,7 +70,13 @@ export class OfficeScene extends Phaser.Scene {
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.agentSyncStop?.();
+      this.tilesetSwitchStop?.();
       this.agentSyncStop = undefined;
+      this.tilesetSwitchStop = undefined;
+    });
+    this.tilesetSwitchStop = gameBus.on('ui:tileset-selected', ({ variantId }) => {
+      if (variantId === this.activeVariantId) return;
+      this.scene.restart({ variantId });
     });
     emitSampleAgentEvents();
 
