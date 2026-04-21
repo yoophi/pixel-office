@@ -1,6 +1,8 @@
 export { PhaserGame } from './PhaserGame.js';
 export { Character, preloadCharacterAssets } from './entities/Character.js';
 export type { CharacterConfig } from './entities/Character.js';
+export { PathfindingSystem, createPathfindingSystemFromTilemap } from './systems/PathfindingSystem.js';
+export type { PathNode } from './systems/PathfindingSystem.js';
 export {
   createOfficeFromTiledMap,
   createPhaserTilemap,

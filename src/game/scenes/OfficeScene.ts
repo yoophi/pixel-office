@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 
 import { Character } from '../entities/Character.js';
+import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
 import { createPhaserTilemap } from '../tiled/loader.js';
 import { SAMPLE_MAP_KEY } from './BootScene.js';
 
@@ -18,6 +19,7 @@ export class OfficeScene extends Phaser.Scene {
     const { map, layers } = createPhaserTilemap(this, {
       mapKey: SAMPLE_MAP_KEY,
     });
+    const pathfinding = createPathfindingSystemFromTilemap(map);
 
     layers.forEach((layer, index) => {
       layer.setDepth(index);
@@ -42,21 +44,13 @@ export class OfficeScene extends Phaser.Scene {
     this.testCharacter = new Character(this, {
       id: 'sample-agent',
       textureKey: 'character:0',
-      x: 56,
-      y: 64,
+      x: tileCenter(3),
+      y: tileBottom(3),
       direction: 'south',
       status: 'idle',
     });
     this.testCharacter.setDepth(layers.length);
-
-    this.time.addEvent({
-      delay: 1500,
-      loop: true,
-      callback: () => {
-        if (!this.testCharacter) return;
-        this.testCharacter.setStatus(getNextStatus(this.testCharacter.status));
-      },
-    });
+    moveCharacterAlongPath(this, this.testCharacter, pathfinding.findPath({ x: 3, y: 3 }, { x: 16, y: 8 }));
 
     this.scale.on(Phaser.Scale.Events.RESIZE, (gameSize: Phaser.Structs.Size) => {
       camera.setZoom(getIntegerZoom(gameSize.width, gameSize.height, worldWidth, worldHeight));
@@ -70,13 +64,40 @@ export class OfficeScene extends Phaser.Scene {
   }
 }
 
-function getNextStatus(status: Character['status']): Character['status'] {
-  if (status === 'idle') return 'walking';
-  if (status === 'walking') return 'typing';
-  return 'idle';
-}
-
 function getIntegerZoom(viewportWidth: number, viewportHeight: number, worldWidth: number, worldHeight: number) {
   const fitZoom = Math.min(viewportWidth / worldWidth, viewportHeight / worldHeight);
   return Math.max(1, Math.floor(fitZoom || TARGET_TILE_SIZE / TARGET_TILE_SIZE));
+}
+
+function moveCharacterAlongPath(scene: Phaser.Scene, character: Character, path: PathNode[]) {
+  if (path.length === 0) {
+    character.setStatus('typing');
+    return;
+  }
+
+  const tweens = path.map((node, index) => ({
+    targets: character.sprite,
+    x: tileCenter(node.x),
+    y: tileBottom(node.y),
+    duration: index === 0 ? 0 : 220,
+    onStart: () => {
+      character.setDirection(node.direction);
+      character.setStatus('walking');
+    },
+  }));
+
+  scene.tweens.chain({
+    tweens,
+    onComplete: () => {
+      character.setStatus('typing');
+    },
+  });
+}
+
+function tileCenter(tile: number) {
+  return tile * TARGET_TILE_SIZE + TARGET_TILE_SIZE / 2;
+}
+
+function tileBottom(tile: number) {
+  return (tile + 1) * TARGET_TILE_SIZE;
 }
