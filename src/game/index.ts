@@ -1,4 +1,6 @@
 export { PhaserGame } from './PhaserGame.js';
+export { Character, preloadCharacterAssets } from './entities/Character.js';
+export type { CharacterConfig } from './entities/Character.js';
 export {
   createOfficeFromTiledMap,
   createPhaserTilemap,
