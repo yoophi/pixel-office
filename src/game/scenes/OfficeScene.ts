@@ -5,6 +5,7 @@ import type { Agent, AgentId, AgentStatus, GridPoint } from '../../domain/index.
 import { Character } from '../entities/Character.js';
 import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
 import { createSeatAssignmentSystemFromTilemap, type SeatAssignmentSystem } from '../systems/SeatAssignmentSystem.js';
+import { SocialSystem } from '../systems/SocialSystem.js';
 import { createPhaserTilemap } from '../tiled/loader.js';
 import { SAMPLE_MAP_KEY } from './BootScene.js';
 
@@ -13,6 +14,7 @@ const TARGET_TILE_SIZE = 16;
 export class OfficeScene extends Phaser.Scene {
   private fpsText?: Phaser.GameObjects.Text;
   private agentSyncStop?: Unsubscribe;
+  private socialSystem?: SocialSystem;
   private readonly characters = new Map<AgentId, Character>();
   private readonly agentTiles = new Map<AgentId, GridPoint>();
 
@@ -26,6 +28,7 @@ export class OfficeScene extends Phaser.Scene {
     });
     const pathfinding = createPathfindingSystemFromTilemap(map);
     const seatAssignment = createSeatAssignmentSystemFromTilemap(map);
+    this.socialSystem = new SocialSystem(this);
 
     layers.forEach((layer, index) => {
       layer.setDepth(index);
@@ -54,6 +57,7 @@ export class OfficeScene extends Phaser.Scene {
         agentTiles: this.agentTiles,
         characterDepth: layers.length,
         seatAssignment,
+        socialSystem: this.socialSystem,
         findPath: (start, goal) => pathfinding.findPath(start, goal),
       }),
     );
@@ -72,6 +76,7 @@ export class OfficeScene extends Phaser.Scene {
   update() {
     if (!this.fpsText) return;
     this.fpsText.setText(`FPS ${Math.round(this.game.loop.actualFps)}`);
+    this.socialSystem?.update();
   }
 }
 
@@ -81,6 +86,7 @@ interface OfficeSceneAgentControllerConfig {
   agentTiles: Map<AgentId, GridPoint>;
   characterDepth: number;
   seatAssignment: SeatAssignmentSystem;
+  socialSystem: SocialSystem;
   findPath(start: GridPoint, goal: GridPoint): PathNode[];
 }
 
@@ -139,17 +145,7 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
     showSpeech(agentId, message, durationMs) {
       const character = config.characters.get(agentId);
       if (!character) return;
-
-      const text = config.scene.add.text(character.sprite.x, character.sprite.y - 40, message, {
-        backgroundColor: '#111827',
-        color: '#ffffff',
-        fontFamily: 'monospace',
-        fontSize: '10px',
-        padding: { x: 4, y: 2 },
-      });
-      text.setOrigin(0.5, 1);
-      text.setDepth(character.sprite.depth + 1);
-      config.scene.time.delayedCall(durationMs, () => text.destroy());
+      config.socialSystem.showSpeech(character.sprite, message, durationMs);
     },
   };
 }
