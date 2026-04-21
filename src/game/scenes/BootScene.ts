@@ -1,10 +1,22 @@
 import * as Phaser from 'phaser';
 
+import { preloadTiledMapAssets } from '../tiled/loader.js';
+
+export const SAMPLE_MAP_KEY = 'sample-office';
+export const SAMPLE_MAP_URL = '/maps/sample.tmj';
+
 export class BootScene extends Phaser.Scene {
   private fpsText?: Phaser.GameObjects.Text;
 
   constructor() {
     super('BootScene');
+  }
+
+  preload() {
+    preloadTiledMapAssets(this, {
+      mapKey: SAMPLE_MAP_KEY,
+      mapUrl: SAMPLE_MAP_URL,
+    });
   }
 
   create() {
@@ -15,6 +27,7 @@ export class BootScene extends Phaser.Scene {
       fontSize: '14px',
     });
     this.fpsText.setScrollFactor(0);
+    this.scene.start('OfficeScene');
   }
 
   update() {
