@@ -1,1 +1,4 @@
-export {};
+export type { Agent, AgentId, AgentStatus, AgentVisualState, Direction } from './agent.js';
+export type { AgentEvent } from './events.js';
+export { mapAgentToVisualState, mapStatusToVisualState } from './mapping.js';
+export type { GridPoint, Office, Seat, SeatId, TilesetVariant } from './office.js';
