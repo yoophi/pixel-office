@@ -150,6 +150,13 @@
   box-shadow: 0 0 0 2px #171004 inset;
 }
 
+.demo-map__cell--agent {
+  background: #74a7ff;
+  box-shadow:
+    0 0 0 2px #071321 inset,
+    0 0 10px rgba(116, 167, 255, 0.42);
+}
+
 .demo-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

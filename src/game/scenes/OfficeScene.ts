@@ -36,7 +36,8 @@ export class OfficeScene extends Phaser.Scene {
       variantId: this.activeVariantId,
     });
     const demoBlocked = new Set<string>();
-    const pathfinding = createPathfindingSystemFromTilemap(map, undefined, demoBlocked);
+    const isDemoBlocked = (point: GridPoint) => demoBlocked.has(toGridKey(point));
+    const pathfinding = createPathfindingSystemFromTilemap(map, undefined, isDemoBlocked);
     const seatAssignment = createSeatAssignmentSystemFromTilemap(map);
     this.socialSystem = new SocialSystem(this);
 
@@ -70,6 +71,10 @@ export class OfficeScene extends Phaser.Scene {
         seatAssignment,
         socialSystem: this.socialSystem,
         findPath: (start, goal) => pathfinding.findPath(start, goal),
+        findPathAvoidingAgents: (agentId, start, goal) =>
+          createPathfindingSystemFromTilemap(map, undefined, (point) =>
+            isDemoBlocked(point) || isOccupiedByOtherAgent(this.agentTiles, agentId, start, goal, point),
+          ).findPath(start, goal),
         isActive: () => isActive,
       }),
     );
@@ -123,6 +128,7 @@ interface OfficeSceneAgentControllerConfig {
   seatAssignment: SeatAssignmentSystem;
   socialSystem: SocialSystem;
   findPath(start: GridPoint, goal: GridPoint): PathNode[];
+  findPathAvoidingAgents(agentId: AgentId, start: GridPoint, goal: GridPoint): PathNode[];
   isActive(): boolean;
 }
 
@@ -148,13 +154,13 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
         direction: agent.direction ?? 'south',
         status: toCharacterStatus(agent.status),
       });
-      character.setDepth(config.characterDepth);
+      updateCharacterDepth(character, config.characterDepth);
       playMatrixSpawnEffect(config.scene, character.sprite);
       ensureCharacterVisible(character);
       config.characters.set(agent.id, character);
       config.agentTiles.set(agent.id, position);
 
-      const seat = config.seatAssignment.assignSeat(agent.id, agent.seatId);
+      const seat = shouldAutoAssignSeat(agent.id) ? config.seatAssignment.assignSeat(agent.id, agent.seatId) : undefined;
       if (seat) {
         moveAgentToPoint(config, agent.id, seat.position, 'typing');
       }
@@ -180,12 +186,18 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
       const start = config.agentTiles.get(agentId);
       if (!character || !start) return;
 
-      moveCharacterAlongPath(config.scene, character, config.findPath(start, destination), () => {
-        config.agentTiles.set(agentId, destination);
-        if (finalDirection) {
-          character.setDirection(finalDirection);
-        }
-      });
+      moveCharacterAlongPath(
+        config.scene,
+        character,
+        config.findPathAvoidingAgents(agentId, start, destination),
+        config.characterDepth,
+        () => {
+          config.agentTiles.set(agentId, destination);
+          if (finalDirection) {
+            character.setDirection(finalDirection);
+          }
+        },
+      );
     },
     assignSeat(agentId, seatId) {
       if (!config.isActive()) return;
@@ -213,7 +225,7 @@ function moveAgentToPoint(
   if (!character || !start) return;
 
   stopCharacterTweens(config.scene, character);
-  moveCharacterAlongPath(config.scene, character, config.findPath(start, destination), () => {
+  moveCharacterAlongPath(config.scene, character, config.findPath(start, destination), config.characterDepth, () => {
     config.agentTiles.set(agentId, destination);
     character.setStatus(finalStatus);
   });
@@ -230,6 +242,10 @@ function ensureCharacterVisible(character: Character) {
   character.sprite.setVisible(true);
   character.sprite.setAlpha(1);
   character.sprite.setTint(0xffffff);
+}
+
+function shouldAutoAssignSeat(agentId: AgentId) {
+  return !agentId.startsWith('demo-');
 }
 
 function setDemoObstacles(
@@ -283,11 +299,13 @@ function moveCharacterAlongPath(
   scene: Phaser.Scene,
   character: Character,
   path: PathNode[],
+  characterDepth: number,
   onComplete?: () => void,
 ) {
   stopCharacterTweens(scene, character);
 
   if (path.length === 0) {
+    updateCharacterDepth(character, characterDepth);
     character.setStatus('typing');
     onComplete?.();
     return;
@@ -301,12 +319,15 @@ function moveCharacterAlongPath(
     onStart: () => {
       character.setDirection(node.direction);
       character.setStatus('walking');
+      updateCharacterDepth(character, characterDepth);
     },
+    onUpdate: () => updateCharacterDepth(character, characterDepth),
   }));
 
   scene.tweens.chain({
     tweens,
     onComplete: () => {
+      updateCharacterDepth(character, characterDepth);
       character.setStatus('typing');
       onComplete?.();
     },
@@ -326,6 +347,29 @@ function tileBottom(tile: number) {
   return (tile + 1) * TARGET_TILE_SIZE;
 }
 
+function updateCharacterDepth(character: Character, baseDepth: number) {
+  character.setDepth(baseDepth + character.sprite.y / 10000);
+}
+
 function toGridKey(point: GridPoint) {
   return `${point.x}:${point.y}`;
+}
+
+function isOccupiedByOtherAgent(
+  agentTiles: ReadonlyMap<AgentId, GridPoint>,
+  movingAgentId: AgentId,
+  start: GridPoint,
+  goal: GridPoint,
+  point: GridPoint,
+) {
+  if (point.x === start.x && point.y === start.y) return false;
+  if (point.x === goal.x && point.y === goal.y) return false;
+
+  for (const [agentId, occupied] of agentTiles) {
+    if (agentId !== movingAgentId && occupied.x === point.x && occupied.y === point.y) {
+      return true;
+    }
+  }
+
+  return false;
 }

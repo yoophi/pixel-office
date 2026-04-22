@@ -5,6 +5,7 @@ import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom';
 import { gameBus } from './bridge/index.js';
 import type { Agent } from './domain/index.js';
 import { PhaserGame } from './game/PhaserGame.js';
+import { DemoAgentCollisionRoute } from './ui/DemoAgentCollisionRoute.js';
 import { DemoObstacleRoute } from './ui/DemoObstacleRoute.js';
 import { TilesetSwitcher } from './ui/TilesetSwitcher/TilesetSwitcher.js';
 
@@ -18,8 +19,16 @@ const router = createHashRouter([
     element: <OfficeRoute />,
   },
   {
-    path: '/demo/*',
+    path: '/demo/obstacle-walking',
     element: <DemoObstacleRoute />,
+  },
+  {
+    path: '/demo/agent-collision',
+    element: <DemoAgentCollisionRoute />,
+  },
+  {
+    path: '/demo/*',
+    element: <Navigate replace to="/demo/agent-collision" />,
   },
   {
     path: '*',
