@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { gameBus } from '../bridge/index.js';
 import type { Agent, AgentId, Direction, GridPoint } from '../domain/index.js';
 import { PhaserGame } from '../game/PhaserGame.js';
+import { DemoNavigation } from './DemoNavigation.js';
 import { TilesetSwitcher } from './TilesetSwitcher/TilesetSwitcher.js';
 
 const RUNNER_AGENT_ID = 'demo-collision-runner';
@@ -159,6 +160,7 @@ export function DemoAgentCollisionRoute() {
     <div className="app-shell demo-shell" aria-label="캐릭터 충돌 회피 데모">
       <PhaserGame />
       <TilesetSwitcher />
+      <DemoNavigation />
       <section className="demo-panel" aria-label="데모 컨트롤">
         <div className="demo-panel__header">
           <button className="demo-panel__back" onClick={() => navigate('/', { replace: false })} type="button">
@@ -177,7 +179,7 @@ export function DemoAgentCollisionRoute() {
             const isWall = x === 0 || y === 0 || x === MAP_WIDTH - 1 || y === MAP_HEIGHT - 1;
             const isStart = x === activeScenario.start.x && y === activeScenario.start.y;
             const isGoal = x === activeScenario.goal.x && y === activeScenario.goal.y;
-            const isDesk = x === activeScenario.goal.x + 1 && y === activeScenario.goal.y;
+            const isDesk = getDeskFootprint(getGoalDesk(activeScenario)).some((desk) => desk.x === x && desk.y === y);
             const className = [
               'demo-map__cell',
               isWall ? 'demo-map__cell--wall' : '',
@@ -229,7 +231,7 @@ function createRandomBlockersByScenario() {
 
 function createRandomBlockers(scenario: Scenario): DemoBlocker[] {
   const candidates = getWalkableCandidates(scenario);
-  const fixedBlocked = new Set([...furnitureTiles, toGridKey(getGoalDesk(scenario))]);
+  const fixedBlocked = new Set([...furnitureTiles, ...getDeskFootprint(getGoalDesk(scenario)).map(toGridKey)]);
 
   for (let attempt = 0; attempt < 120; attempt += 1) {
     const blockers = shuffle(candidates).slice(0, scenario.blockerCount);
@@ -251,7 +253,11 @@ function createRandomBlockers(scenario: Scenario): DemoBlocker[] {
 }
 
 function getWalkableCandidates(scenario: Scenario) {
-  const reserved = new Set([toGridKey(scenario.start), toGridKey(scenario.goal), toGridKey(getGoalDesk(scenario))]);
+  const reserved = new Set([
+    toGridKey(scenario.start),
+    toGridKey(scenario.goal),
+    ...getDeskFootprint(getGoalDesk(scenario)).map(toGridKey),
+  ]);
   const candidates: GridPoint[] = [];
 
   for (let y = 1; y < MAP_HEIGHT - 1; y += 1) {
@@ -304,6 +310,13 @@ function hasRoute(start: GridPoint, goal: GridPoint, blocked: ReadonlySet<string
 
 function getGoalDesk(scenario: Scenario): GridPoint {
   return { x: scenario.goal.x + 1, y: scenario.goal.y };
+}
+
+function getDeskFootprint(anchor: GridPoint): GridPoint[] {
+  return [
+    { x: anchor.x, y: anchor.y - 1 },
+    anchor,
+  ];
 }
 
 function shuffle<T>(items: T[]) {

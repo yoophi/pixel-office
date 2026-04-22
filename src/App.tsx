@@ -5,8 +5,11 @@ import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom';
 import { gameBus } from './bridge/index.js';
 import type { Agent } from './domain/index.js';
 import { PhaserGame } from './game/PhaserGame.js';
+import { DemoAgentCrowdCollisionRoute } from './ui/DemoAgentCrowdCollisionRoute.js';
 import { DemoAgentCollisionRoute } from './ui/DemoAgentCollisionRoute.js';
+import { DemoDepthSortingRoute } from './ui/DemoDepthSortingRoute.js';
 import { DemoObstacleRoute } from './ui/DemoObstacleRoute.js';
+import { demoRoutes } from './ui/demoRoutes.js';
 import { TilesetSwitcher } from './ui/TilesetSwitcher/TilesetSwitcher.js';
 
 function App() {
@@ -27,8 +30,16 @@ const router = createHashRouter([
     element: <DemoAgentCollisionRoute />,
   },
   {
+    path: '/demo/agent-crowd-collision',
+    element: <DemoAgentCrowdCollisionRoute />,
+  },
+  {
+    path: '/demo/depth-sorting',
+    element: <DemoDepthSortingRoute />,
+  },
+  {
     path: '/demo/*',
-    element: <Navigate replace to="/demo/agent-collision" />,
+    element: <Navigate replace to={demoRoutes[0].path} />,
   },
   {
     path: '*',

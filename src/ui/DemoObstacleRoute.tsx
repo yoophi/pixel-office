@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { gameBus } from '../bridge/index.js';
 import type { Agent, GridPoint } from '../domain/index.js';
 import { PhaserGame } from '../game/PhaserGame.js';
+import { DemoNavigation } from './DemoNavigation.js';
 import { TilesetSwitcher } from './TilesetSwitcher/TilesetSwitcher.js';
 
 const DEMO_AGENT_ID = 'demo-pathfinder';
@@ -131,6 +132,7 @@ export function DemoObstacleRoute() {
     <div className="app-shell demo-shell" aria-label="장애물 회피 걷기 데모">
       <PhaserGame />
       <TilesetSwitcher />
+      <DemoNavigation />
       <section className="demo-panel" aria-label="데모 컨트롤">
         <div className="demo-panel__header">
           <button className="demo-panel__back" onClick={goToOffice} type="button">
@@ -151,7 +153,7 @@ export function DemoObstacleRoute() {
             const isWall = x === 0 || y === 0 || x === MAP_WIDTH - 1 || y === MAP_HEIGHT - 1;
             const isStart = x === START.x && y === START.y;
             const isGoal = x === activeScenario.goal.x && y === activeScenario.goal.y;
-            const isDesk = x === activeScenario.goal.x + 1 && y === activeScenario.goal.y;
+            const isDesk = getDeskFootprint(getGoalDesk(activeScenario.goal)).some((desk) => desk.x === x && desk.y === y);
             const className = [
               'demo-map__cell',
               isWall ? 'demo-map__cell--wall' : '',
@@ -191,7 +193,7 @@ function generateRandomObstacles() {
     toGridKey(START),
     ...scenarios.flatMap((scenario) => [
       toGridKey(scenario.goal),
-      toGridKey({ x: scenario.goal.x + 1, y: scenario.goal.y }),
+      ...getDeskFootprint(getGoalDesk(scenario.goal)).map(toGridKey),
     ]),
   ]);
   const candidates: GridPoint[] = [];
@@ -213,7 +215,7 @@ function generateRandomObstacles() {
 
     if (
       scenarios.every((scenario) =>
-        hasRoute(START, scenario.goal, new Set([...blocked, toGridKey({ x: scenario.goal.x + 1, y: scenario.goal.y })])),
+        hasRoute(START, scenario.goal, new Set([...blocked, ...getDeskFootprint(getGoalDesk(scenario.goal)).map(toGridKey)])),
       )
     ) {
       return obstacles;
@@ -248,7 +250,7 @@ function getMoveDurationMs(start: GridPoint, goal: GridPoint, obstacles: GridPoi
   const blocked = new Set([
     ...createBaseBlockedTiles(),
     ...obstacles.map(toGridKey),
-    toGridKey({ x: goal.x + 1, y: goal.y }),
+    ...getDeskFootprint(getGoalDesk(goal)).map(toGridKey),
   ]);
   const distance = getShortestPathDistance(start, goal, blocked) ?? 0;
   return Math.max(0, distance - 1) * 220 + 120;
@@ -294,4 +296,15 @@ function getShortestPathDistance(start: GridPoint, goal: GridPoint, blocked: Rea
 
 function toGridKey(point: GridPoint) {
   return `${point.x}:${point.y}`;
+}
+
+function getGoalDesk(goal: GridPoint): GridPoint {
+  return { x: goal.x + 1, y: goal.y };
+}
+
+function getDeskFootprint(anchor: GridPoint): GridPoint[] {
+  return [
+    { x: anchor.x, y: anchor.y - 1 },
+    anchor,
+  ];
 }

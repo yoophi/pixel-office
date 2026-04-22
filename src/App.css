@@ -7,12 +7,74 @@
 }
 
 .phaser-host {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(var(--canvas-width, 960px), 100vw);
+  height: min(var(--canvas-height, 528px), 100vh);
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  transform: translate(-50%, -50%);
 }
 
 .phaser-host canvas {
   display: block;
+}
+
+.game-canvas-toolbar {
+  position: absolute;
+  left: 20px;
+  bottom: 20px;
+  z-index: 21;
+  display: grid;
+  gap: 8px;
+  width: min(270px, calc(100vw - 40px));
+  padding: 10px;
+  color: #eef6ee;
+  background: rgba(7, 12, 16, 0.88);
+  border: 1px solid rgba(190, 244, 210, 0.24);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(10px);
+}
+
+.game-canvas-toolbar p {
+  margin: 0;
+  color: #f6d77b;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.game-canvas-toolbar__group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.game-canvas-toolbar__group:first-of-type {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.game-canvas-toolbar button {
+  min-height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #dfeae2;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.game-canvas-toolbar button:hover {
+  border-color: rgba(185, 245, 199, 0.56);
+}
+
+.game-canvas-toolbar button[aria-pressed='true'] {
+  color: #07100a;
+  background: #b9f5c7;
+  border-color: #b9f5c7;
 }
 
 .tileset-switcher {
@@ -164,6 +226,75 @@
   margin-top: 14px;
 }
 
+.demo-actions--single {
+  grid-template-columns: 1fr;
+}
+
+.demo-depth-list {
+  display: grid;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.demo-depth-list span {
+  padding: 8px 10px;
+  color: #dfeae2;
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 3px solid #f6d77b;
+  font-size: 13px;
+}
+
+.demo-nav {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20;
+  width: min(260px, calc(100vw - 40px));
+  padding: 10px;
+  color: #eef6ee;
+  background: rgba(7, 12, 16, 0.88);
+  border: 1px solid rgba(190, 244, 210, 0.24);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(10px);
+}
+
+.demo-nav p {
+  margin: 0 0 8px;
+  color: #f6d77b;
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.demo-nav div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.demo-nav a {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 8px;
+  color: #dfeae2;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.demo-nav a:hover {
+  border-color: rgba(185, 245, 199, 0.56);
+}
+
+.demo-nav a.is-active {
+  color: #07100a;
+  background: #b9f5c7;
+  border-color: #b9f5c7;
+}
+
 .demo-actions button {
   min-height: 42px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -199,5 +330,21 @@
   .demo-shell .tileset-switcher {
     left: 12px;
     top: 12px;
+  }
+
+  .game-canvas-toolbar {
+    left: 12px;
+    bottom: 12px;
+    width: min(270px, calc(100vw - 24px));
+  }
+
+  .demo-shell .game-canvas-toolbar {
+    bottom: 148px;
+  }
+
+  .demo-nav {
+    right: 12px;
+    bottom: 12px;
+    width: min(260px, calc(100vw - 24px));
   }
 }

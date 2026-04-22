@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 
 import type { AgentStatus, Direction } from '../../domain/index.js';
 
-const CHARACTER_COUNT = 6;
+export const CHARACTER_COUNT = 6;
 const CHARACTER_FRAME_WIDTH = 16;
 const CHARACTER_FRAME_HEIGHT = 32;
 const FRAMES_PER_DIRECTION = 7;

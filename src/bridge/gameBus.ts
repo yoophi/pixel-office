@@ -6,10 +6,11 @@ export type GameBusEventMap = Record<string, unknown>;
 
 export interface PixelOfficeGameEvents extends GameBusEventMap {
   'agent:event': AgentEvent;
+  'agent:move-complete': { agentId: AgentId; destination: GridPoint; completedAt: number };
   'game:ready': { readyAt: number };
   'ui:agent-selected': { agentId: AgentId | null };
   'ui:tileset-selected': { variantId: string };
-  'demo:obstacles-set': { obstacles: GridPoint[]; goal?: GridPoint };
+  'demo:obstacles-set': { obstacles: GridPoint[]; goal?: GridPoint; seats?: GridPoint[] };
 }
 
 export class GameBus<Events extends GameBusEventMap> {

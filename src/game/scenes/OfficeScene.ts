@@ -2,7 +2,7 @@ import * as Phaser from 'phaser';
 
 import { gameBus, startAgentSync, type AgentSyncController, type Unsubscribe } from '../../bridge/index.js';
 import type { AgentId, AgentStatus, GridPoint } from '../../domain/index.js';
-import { Character } from '../entities/Character.js';
+import { Character, CHARACTER_COUNT } from '../entities/Character.js';
 import { playMatrixDespawnEffect, playMatrixSpawnEffect } from '../effects/MatrixEffect.js';
 import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
 import { createSeatAssignmentSystemFromTilemap, type SeatAssignmentSystem } from '../systems/SeatAssignmentSystem.js';
@@ -11,6 +11,8 @@ import { createPhaserTilemap } from '../tiled/loader.js';
 import { DEMO_CHAIR_KEY, DEMO_DESK_KEY, SAMPLE_MAP_KEY } from './BootScene.js';
 
 const TARGET_TILE_SIZE = 16;
+const MOVE_STEP_DURATION_MS = 220;
+const REPLAN_DELAY_MS = 360;
 
 export class OfficeScene extends Phaser.Scene {
   private fpsText?: Phaser.GameObjects.Text;
@@ -39,6 +41,7 @@ export class OfficeScene extends Phaser.Scene {
     const isDemoBlocked = (point: GridPoint) => demoBlocked.has(toGridKey(point));
     const pathfinding = createPathfindingSystemFromTilemap(map, undefined, isDemoBlocked);
     const seatAssignment = createSeatAssignmentSystemFromTilemap(map);
+    const movementTokens = new Map<AgentId, number>();
     this.socialSystem = new SocialSystem(this);
 
     layers.forEach((layer, index) => {
@@ -68,6 +71,7 @@ export class OfficeScene extends Phaser.Scene {
         characters: this.characters,
         agentTiles: this.agentTiles,
         characterDepth: layers.length,
+        movementTokens,
         seatAssignment,
         socialSystem: this.socialSystem,
         findPath: (start, goal) => pathfinding.findPath(start, goal),
@@ -96,6 +100,7 @@ export class OfficeScene extends Phaser.Scene {
       this.characters.forEach((character) => character.destroy());
       this.characters.clear();
       this.agentTiles.clear();
+      movementTokens.clear();
       this.scale.off(Phaser.Scale.Events.RESIZE, handleResize);
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
@@ -105,8 +110,8 @@ export class OfficeScene extends Phaser.Scene {
       this.scene.restart({ variantId });
     });
     const demoObstacleGroup = this.add.group();
-    this.demoObstacleStop = gameBus.on('demo:obstacles-set', ({ obstacles, goal }) => {
-      setDemoObstacles(this, demoObstacleGroup, demoBlocked, obstacles, goal, layers.length - 0.2);
+    this.demoObstacleStop = gameBus.on('demo:obstacles-set', ({ obstacles, goal, seats }) => {
+      setDemoObstacles(this, demoObstacleGroup, demoBlocked, obstacles, goal, layers.length, seats);
     });
     gameBus.emit('game:ready', { readyAt: Date.now() });
 
@@ -125,6 +130,7 @@ interface OfficeSceneAgentControllerConfig {
   characters: Map<AgentId, Character>;
   agentTiles: Map<AgentId, GridPoint>;
   characterDepth: number;
+  movementTokens: Map<AgentId, number>;
   seatAssignment: SeatAssignmentSystem;
   socialSystem: SocialSystem;
   findPath(start: GridPoint, goal: GridPoint): PathNode[];
@@ -148,7 +154,7 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
 
       const character = new Character(config.scene, {
         id: agent.id,
-        textureKey: 'character:0',
+        textureKey: getCharacterTextureKey(agent.id),
         x: tileCenter(position.x),
         y: tileBottom(position.y),
         direction: agent.direction ?? 'south',
@@ -167,6 +173,7 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
     },
     removeAgent(agentId) {
       if (!config.isActive()) return;
+      config.movementTokens.set(agentId, (config.movementTokens.get(agentId) ?? 0) + 1);
       const character = config.characters.get(agentId);
       if (character) {
         stopCharacterTweens(config.scene, character);
@@ -186,18 +193,13 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
       const start = config.agentTiles.get(agentId);
       if (!character || !start) return;
 
-      moveCharacterAlongPath(
-        config.scene,
-        character,
-        config.findPathAvoidingAgents(agentId, start, destination),
-        config.characterDepth,
-        () => {
-          config.agentTiles.set(agentId, destination);
-          if (finalDirection) {
-            character.setDirection(finalDirection);
-          }
-        },
-      );
+      const token = (config.movementTokens.get(agentId) ?? 0) + 1;
+      config.movementTokens.set(agentId, token);
+      moveAgentWithReplanning(config, agentId, destination, token, () => {
+        if (finalDirection) {
+          character.setDirection(finalDirection);
+        }
+      });
     },
     assignSeat(agentId, seatId) {
       if (!config.isActive()) return;
@@ -225,9 +227,60 @@ function moveAgentToPoint(
   if (!character || !start) return;
 
   stopCharacterTweens(config.scene, character);
+  config.movementTokens.set(agentId, (config.movementTokens.get(agentId) ?? 0) + 1);
   moveCharacterAlongPath(config.scene, character, config.findPath(start, destination), config.characterDepth, () => {
     config.agentTiles.set(agentId, destination);
     character.setStatus(finalStatus);
+  });
+}
+
+function moveAgentWithReplanning(
+  config: OfficeSceneAgentControllerConfig,
+  agentId: AgentId,
+  destination: GridPoint,
+  token: number,
+  onComplete?: () => void,
+) {
+  if (!config.isActive() || config.movementTokens.get(agentId) !== token) return;
+  const character = config.characters.get(agentId);
+  const current = config.agentTiles.get(agentId);
+  if (!character || !current) return;
+
+  if (current.x === destination.x && current.y === destination.y) {
+    character.setStatus('idle');
+    updateCharacterDepth(character, config.characterDepth);
+    gameBus.emit('agent:move-complete', { agentId, destination, completedAt: Date.now() });
+    onComplete?.();
+    return;
+  }
+
+  const path = config.findPathAvoidingAgents(agentId, current, destination);
+  const next = path[0];
+  if (!next || isOccupiedByOtherAgent(config.agentTiles, agentId, current, destination, next)) {
+    character.setStatus('idle');
+    config.scene.time.delayedCall(REPLAN_DELAY_MS, () =>
+      moveAgentWithReplanning(config, agentId, destination, token, onComplete),
+    );
+    return;
+  }
+
+  stopCharacterTweens(config.scene, character);
+  config.scene.tweens.add({
+    targets: character.sprite,
+    x: tileCenter(next.x),
+    y: tileBottom(next.y),
+    duration: MOVE_STEP_DURATION_MS,
+    onStart: () => {
+      character.setDirection(next.direction);
+      character.setStatus('walking');
+      updateCharacterDepth(character, config.characterDepth);
+    },
+    onUpdate: () => updateCharacterDepth(character, config.characterDepth),
+    onComplete: () => {
+      config.agentTiles.set(agentId, next);
+      updateCharacterDepth(character, config.characterDepth);
+      moveAgentWithReplanning(config, agentId, destination, token, onComplete);
+    },
   });
 }
 
@@ -248,6 +301,16 @@ function shouldAutoAssignSeat(agentId: AgentId) {
   return !agentId.startsWith('demo-');
 }
 
+function getCharacterTextureKey(agentId: AgentId) {
+  let hash = 0;
+
+  for (let index = 0; index < agentId.length; index += 1) {
+    hash = (hash * 31 + agentId.charCodeAt(index)) >>> 0;
+  }
+
+  return `character:${hash % CHARACTER_COUNT}`;
+}
+
 function setDemoObstacles(
   scene: Phaser.Scene,
   group: Phaser.GameObjects.Group,
@@ -255,6 +318,7 @@ function setDemoObstacles(
   obstacles: GridPoint[],
   goal: GridPoint | undefined,
   depth: number,
+  seats?: GridPoint[],
 ) {
   group.clear(true, true);
   blocked.clear();
@@ -270,24 +334,27 @@ function setDemoObstacles(
       0.92,
     );
     obstacle.setStrokeStyle(1, 0xf0c48b, 0.38);
-    obstacle.setDepth(depth);
+    obstacle.setDepth(getObjectDepth(point, depth));
     group.add(obstacle);
   });
 
-  if (!goal) return;
+  const seatPoints = seats ?? (goal ? [goal] : []);
+  if (seatPoints.length === 0) return;
 
-  const desk = { x: goal.x + 1, y: goal.y };
-  blocked.add(toGridKey(desk));
+  seatPoints.forEach((seat) => {
+    const desk = { x: seat.x + 1, y: seat.y };
+    getDeskFootprint(desk).forEach((point) => blocked.add(toGridKey(point)));
 
-  const chairSprite = scene.add.image(tileCenter(goal.x), tileBottom(goal.y), DEMO_CHAIR_KEY);
-  chairSprite.setOrigin(0.5, 1);
-  chairSprite.setDepth(depth + 0.05);
-  group.add(chairSprite);
+    const chairSprite = scene.add.image(tileCenter(seat.x), tileBottom(seat.y), DEMO_CHAIR_KEY);
+    chairSprite.setOrigin(0.5, 1);
+    chairSprite.setDepth(getObjectDepth(seat, depth));
+    group.add(chairSprite);
 
-  const deskSprite = scene.add.image(tileCenter(desk.x), tileBottom(desk.y), DEMO_DESK_KEY);
-  deskSprite.setOrigin(0.5, 1);
-  deskSprite.setDepth(depth + 0.1);
-  group.add(deskSprite);
+    const deskSprite = scene.add.image(tileCenter(desk.x), tileBottom(desk.y), DEMO_DESK_KEY);
+    deskSprite.setOrigin(0.5, 1);
+    deskSprite.setDepth(getObjectDepth(desk, depth));
+    group.add(deskSprite);
+  });
 }
 
 function getIntegerZoom(viewportWidth: number, viewportHeight: number, worldWidth: number, worldHeight: number) {
@@ -349,6 +416,17 @@ function tileBottom(tile: number) {
 
 function updateCharacterDepth(character: Character, baseDepth: number) {
   character.setDepth(baseDepth + character.sprite.y / 10000);
+}
+
+function getObjectDepth(point: GridPoint, baseDepth: number) {
+  return baseDepth + tileBottom(point.y) / 10000;
+}
+
+function getDeskFootprint(anchor: GridPoint): GridPoint[] {
+  return [
+    { x: anchor.x, y: anchor.y - 1 },
+    anchor,
+  ];
 }
 
 function toGridKey(point: GridPoint) {
