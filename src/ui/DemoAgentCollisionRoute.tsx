@@ -5,6 +5,7 @@ import { gameBus } from '../bridge/index.js';
 import type { Agent, AgentId, Direction, GridPoint } from '../domain/index.js';
 import { PhaserGame } from '../game/PhaserGame.js';
 import { DemoNavigation } from './DemoNavigation.js';
+import { useSitOnArrival } from './hooks/useSitOnArrival.js';
 import { TilesetSwitcher } from './TilesetSwitcher/TilesetSwitcher.js';
 
 const RUNNER_AGENT_ID = 'demo-collision-runner';
@@ -42,6 +43,7 @@ const furnitureTiles = new Set(['5:3', '6:3', '10:3', '11:3', '5:4', '6:4', '10:
 
 export function DemoAgentCollisionRoute() {
   const navigate = useNavigate();
+  useSitOnArrival(RUNNER_AGENT_ID);
   const initialBlockers = useMemo(() => createRandomBlockersByScenario(), []);
   const [activeScenarioId, setActiveScenarioId] = useState<Scenario['id']>('desk-row');
   const [blockersByScenario, setBlockersByScenario] = useState(initialBlockers);

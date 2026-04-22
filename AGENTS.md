@@ -35,6 +35,9 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 - [`memory/tiled-schema.md`](memory/tiled-schema.md) — Tiled 맵 레이어·타일셋 규약 (v2 Phaser + Tiled 파이프라인).
 - [`memory/stacked-pr-workflow.md`](memory/stacked-pr-workflow.md) — Stacked PR 머지 시 충돌 방지 가이드 (squash merge + chained branches 문제와 대응).
 - [`memory/phaser-react-lifecycle-notes.md`](memory/phaser-react-lifecycle-notes.md) — React route/HMR/StrictMode와 Phaser Scene/Tween/Texture 생명주기 충돌 주의사항.
+- [`memory/demo-routes-and-canvas-controls.md`](memory/demo-routes-and-canvas-controls.md) — demo route 목록, floating navigation, 공통 Phaser canvas toolbar 규칙.
+- [`memory/phaser-depth-and-pathfinding-notes.md`](memory/phaser-depth-and-pathfinding-notes.md) — Phaser depth 정렬, 가구 footprint, 동적 장애물, 경로 재계산, 좌석 상태 규칙.
+- [`memory/canvas-rendering.md`](memory/canvas-rendering.md) — 게임 캔버스 줌/픽셀 매치 현재 파이프라인과 한계, 관련 설정이 있는 파일 위치.
 
 미래의 에이전트가 알아야 할 프로젝트 수준의 사실(아키텍처 결정, 마이그레이션 상태, 외부 제약 등)을 새로 알게 되면 `memory/<topic>.md`를 추가하고 여기에 링크합니다.
 

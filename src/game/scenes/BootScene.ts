@@ -5,6 +5,11 @@ import { preloadTiledMapAssets } from '../tiled/loader.js';
 
 export const SAMPLE_MAP_KEY = 'sample-office';
 export const SAMPLE_MAP_URL = '/maps/sample.tmj';
+export const SAMPLE_MAP_TILE_SIZE = 16;
+export const SAMPLE_MAP_WIDTH_TILES = 20;
+export const SAMPLE_MAP_HEIGHT_TILES = 11;
+export const SAMPLE_MAP_WIDTH_PX = SAMPLE_MAP_WIDTH_TILES * SAMPLE_MAP_TILE_SIZE;
+export const SAMPLE_MAP_HEIGHT_PX = SAMPLE_MAP_HEIGHT_TILES * SAMPLE_MAP_TILE_SIZE;
 export const DEMO_CHAIR_KEY = 'demo-chair-right';
 export const DEMO_DESK_KEY = 'demo-desk-vertical';
 
@@ -29,8 +34,8 @@ export class BootScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#000000');
     this.fpsText = this.add.text(12, 12, 'FPS 0', {
       color: '#00ff88',
-      fontFamily: 'monospace',
-      fontSize: '14px',
+      fontFamily: '"Galmuri11", monospace',
+      fontSize: '11px',
     });
     this.fpsText.setScrollFactor(0);
     this.scene.start('OfficeScene');

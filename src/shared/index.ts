@@ -1,1 +1,1 @@
-export {};
+export { useViewSettingsStore } from './viewSettingsStore.js';

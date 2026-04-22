@@ -1,3 +1,27 @@
+@font-face {
+  font-family: Galmuri11;
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("/assets/fonts/Galmuri11.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: Galmuri11;
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("/assets/fonts/Galmuri11-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: Galmuri9;
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("/assets/fonts/Galmuri9.woff2") format("woff2");
+}
+
 :root {
   font-family:
     "IBM Plex Sans",

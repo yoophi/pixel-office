@@ -9,6 +9,7 @@ import { DemoAgentCrowdCollisionRoute } from './ui/DemoAgentCrowdCollisionRoute.
 import { DemoAgentCollisionRoute } from './ui/DemoAgentCollisionRoute.js';
 import { DemoDepthSortingRoute } from './ui/DemoDepthSortingRoute.js';
 import { DemoObstacleRoute } from './ui/DemoObstacleRoute.js';
+import { DemoSpeechBubbleRoute } from './ui/DemoSpeechBubbleRoute.js';
 import { demoRoutes } from './ui/demoRoutes.js';
 import { TilesetSwitcher } from './ui/TilesetSwitcher/TilesetSwitcher.js';
 
@@ -36,6 +37,10 @@ const router = createHashRouter([
   {
     path: '/demo/depth-sorting',
     element: <DemoDepthSortingRoute />,
+  },
+  {
+    path: '/demo/speech-bubble',
+    element: <DemoSpeechBubbleRoute />,
   },
   {
     path: '/demo/*',

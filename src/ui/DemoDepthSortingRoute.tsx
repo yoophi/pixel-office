@@ -13,6 +13,8 @@ const DEMO_AGENT_IDS = [
   'demo-depth-agent-back',
   'demo-depth-agent-front',
   'demo-depth-agent-middle',
+  'demo-depth-seated-left',
+  'demo-depth-seated-right',
 ] as const satisfies readonly AgentId[];
 
 const FURNITURE_SEATS: GridPoint[] = [
@@ -55,6 +57,20 @@ const agents: Array<Pick<Agent, 'id' | 'name' | 'status' | 'direction' | 'positi
     status: 'idle',
     direction: 'north',
     position: { x: 5, y: 7 },
+  },
+  {
+    id: 'demo-depth-seated-left',
+    name: 'Seated Left',
+    status: 'sitting',
+    direction: 'east',
+    position: { x: 8, y: 6 },
+  },
+  {
+    id: 'demo-depth-seated-right',
+    name: 'Seated Right',
+    status: 'sitting',
+    direction: 'east',
+    position: { x: 13, y: 6 },
   },
 ];
 
@@ -131,6 +147,7 @@ export function DemoDepthSortingRoute() {
           <span>책상 뒤 캐릭터</span>
           <span>책상 앞 캐릭터</span>
           <span>상/중/하 캐릭터 겹침</span>
+          <span>의자에 앉은 캐릭터</span>
         </div>
 
         <div className="demo-actions demo-actions--single" aria-label="데모 실행">

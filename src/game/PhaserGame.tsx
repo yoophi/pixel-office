@@ -1,42 +1,41 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import * as Phaser from 'phaser';
 
-import { BootScene } from './scenes/BootScene.js';
+import { gameBus } from '../bridge/index.js';
+import {
+  resolvePixelScale,
+  VIEW_ZOOM_OPTIONS,
+  VIEW_ZOOM_REGISTRY_KEY,
+  type PixelSize,
+  type ViewZoom,
+} from '../domain/index.js';
+import { useViewSettingsStore } from '../shared/index.js';
+import { BootScene, SAMPLE_MAP_HEIGHT_PX, SAMPLE_MAP_WIDTH_PX } from './scenes/BootScene.js';
 import { OfficeScene } from './scenes/OfficeScene.js';
 
-const sizeOptions = [
-  { id: 'small', label: 'Small', width: 640 },
-  { id: 'medium', label: 'Medium', width: 960 },
-  { id: 'large', label: 'Large', width: 1280 },
-] as const;
-const aspectOptions = [
-  { id: '16:9', label: '16:9', ratio: 16 / 9 },
-  { id: '4:3', label: '4:3', ratio: 4 / 3 },
-  { id: '1:1', label: '1:1', ratio: 1 },
-  { id: '20:11', label: 'Map', ratio: 20 / 11 },
-] as const;
-
-type SizeOptionId = (typeof sizeOptions)[number]['id'];
-type AspectOptionId = (typeof aspectOptions)[number]['id'];
+const WORLD_SIZE: PixelSize = { width: SAMPLE_MAP_WIDTH_PX, height: SAMPLE_MAP_HEIGHT_PX };
 
 export function PhaserGame() {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
-  const [sizeId, setSizeId] = useState<SizeOptionId>('medium');
-  const [aspectId, setAspectId] = useState<AspectOptionId>('20:11');
-  const size = useCanvasSize(sizeId, aspectId);
+  const zoom = useViewSettingsStore((state) => state.zoom);
+  const setZoom = useViewSettingsStore((state) => state.setZoom);
+  const [viewportSize, setViewportSize] = useState(() => getInitialViewportSize());
+  const canvasSize = useMemo(() => resolveCanvasSize(zoom, viewportSize), [zoom, viewportSize]);
+  const initialCanvasSizeRef = useRef<PixelSize>(canvasSize);
 
   useEffect(() => {
     if (!parentRef.current || gameRef.current) return;
+    const initialCanvasSize = initialCanvasSizeRef.current;
 
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: parentRef.current,
       backgroundColor: '#000000',
       scale: {
-        mode: Phaser.Scale.RESIZE,
-        width: parentRef.current.clientWidth || window.innerWidth,
-        height: parentRef.current.clientHeight || window.innerHeight,
+        mode: Phaser.Scale.NONE,
+        width: initialCanvasSize.width,
+        height: initialCanvasSize.height,
       },
       render: {
         antialias: false,
@@ -45,22 +44,35 @@ export function PhaserGame() {
       },
       scene: [BootScene, OfficeScene],
     });
-
     gameRef.current = game;
 
-    const resizeObserver = new ResizeObserver(([entry]) => {
-      const width = Math.max(1, Math.floor(entry.contentRect.width));
-      const height = Math.max(1, Math.floor(entry.contentRect.height));
-      game.scale.resize(width, height);
-    });
-    resizeObserver.observe(parentRef.current);
+    const handleWindowResize = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      setViewportSize((prev) => (prev.width === width && prev.height === height ? prev : { width, height }));
+    };
+    window.addEventListener('resize', handleWindowResize);
 
     return () => {
-      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleWindowResize);
       game.destroy(true);
       gameRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const game = gameRef.current;
+    if (!game) return;
+    if (game.scale.width === canvasSize.width && game.scale.height === canvasSize.height) return;
+    game.scale.resize(canvasSize.width, canvasSize.height);
+  }, [canvasSize.width, canvasSize.height]);
+
+  useEffect(() => {
+    const game = gameRef.current;
+    if (!game) return;
+    game.registry.set(VIEW_ZOOM_REGISTRY_KEY, zoom);
+    gameBus.emit('ui:zoom-changed', { scale: zoom });
+  }, [zoom]);
 
   return (
     <>
@@ -68,63 +80,54 @@ export function PhaserGame() {
         className="phaser-host"
         ref={parentRef}
         style={{
-          '--canvas-height': `${size.height}px`,
-          '--canvas-width': `${size.width}px`,
+          '--canvas-height': `${canvasSize.height}px`,
+          '--canvas-width': `${canvasSize.width}px`,
         } as CSSProperties}
       />
-      <GameCanvasToolbar
-        aspectId={aspectId}
-        sizeId={sizeId}
-        setAspectId={setAspectId}
-        setSizeId={setSizeId}
-      />
+      <GameCanvasToolbar zoom={zoom} canvasSize={canvasSize} setZoom={setZoom} />
     </>
   );
 }
 
 interface GameCanvasToolbarProps {
-  aspectId: AspectOptionId;
-  sizeId: SizeOptionId;
-  setAspectId(aspectId: AspectOptionId): void;
-  setSizeId(sizeId: SizeOptionId): void;
+  zoom: ViewZoom;
+  canvasSize: { width: number; height: number };
+  setZoom(zoom: ViewZoom): void;
 }
 
-function GameCanvasToolbar({ aspectId, sizeId, setAspectId, setSizeId }: GameCanvasToolbarProps) {
+function GameCanvasToolbar({ zoom, canvasSize, setZoom }: GameCanvasToolbarProps) {
   return (
-    <div className="game-canvas-toolbar" aria-label="게임 캔버스 조정">
-      <p>Canvas</p>
-      <div className="game-canvas-toolbar__group" aria-label="캔버스 크기">
-        {sizeOptions.map((option) => (
+    <div className="game-canvas-toolbar" aria-label="게임 캔버스 줌">
+      <p>Pixel Zoom</p>
+      <div className="game-canvas-toolbar__group" aria-label="줌 배율">
+        {VIEW_ZOOM_OPTIONS.map((option) => (
           <button
-            aria-pressed={sizeId === option.id}
-            key={option.id}
-            onClick={() => setSizeId(option.id)}
+            aria-pressed={zoom === option}
+            key={String(option)}
+            onClick={() => setZoom(option)}
             type="button"
           >
-            {option.label}
+            {formatZoomLabel(option)}
           </button>
         ))}
       </div>
-      <div className="game-canvas-toolbar__group" aria-label="캔버스 비율">
-        {aspectOptions.map((option) => (
-          <button
-            aria-pressed={aspectId === option.id}
-            key={option.id}
-            onClick={() => setAspectId(option.id)}
-            type="button"
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <p className="game-canvas-toolbar__readout">
+        {canvasSize.width} × {canvasSize.height} px
+      </p>
     </div>
   );
 }
 
-function useCanvasSize(sizeId: SizeOptionId, aspectId: AspectOptionId) {
-  return useMemo(() => {
-    const size = sizeOptions.find((option) => option.id === sizeId) ?? sizeOptions[1];
-    const aspect = aspectOptions.find((option) => option.id === aspectId) ?? aspectOptions[3];
-    return { width: size.width, height: Math.round(size.width / aspect.ratio) };
-  }, [aspectId, sizeId]);
+function formatZoomLabel(zoom: ViewZoom) {
+  return zoom === 'fit' ? 'Fit' : `1:${zoom}`;
+}
+
+function getInitialViewportSize(): PixelSize {
+  if (typeof window === 'undefined') return WORLD_SIZE;
+  return { width: window.innerWidth, height: window.innerHeight };
+}
+
+function resolveCanvasSize(zoom: ViewZoom, viewport: PixelSize): PixelSize {
+  const scale = resolvePixelScale(zoom, viewport, WORLD_SIZE);
+  return { width: WORLD_SIZE.width * scale, height: WORLD_SIZE.height * scale };
 }

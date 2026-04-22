@@ -5,6 +5,7 @@ import { gameBus } from '../bridge/index.js';
 import type { Agent, GridPoint } from '../domain/index.js';
 import { PhaserGame } from '../game/PhaserGame.js';
 import { DemoNavigation } from './DemoNavigation.js';
+import { useSitOnArrival } from './hooks/useSitOnArrival.js';
 import { TilesetSwitcher } from './TilesetSwitcher/TilesetSwitcher.js';
 
 const DEMO_AGENT_ID = 'demo-pathfinder';
@@ -31,6 +32,7 @@ const furnitureTiles = new Set(['5:3', '6:3', '10:3', '11:3', '5:4', '6:4', '10:
 
 export function DemoObstacleRoute() {
   const navigate = useNavigate();
+  useSitOnArrival(DEMO_AGENT_ID);
   const randomObstacles = useMemo(() => generateRandomObstacles(), []);
   const randomObstacleKeys = useMemo(() => new Set(randomObstacles.map(toGridKey)), [randomObstacles]);
   const [activeScenarioId, setActiveScenarioId] = useState<(typeof scenarios)[number]['id']>('east-run');
@@ -61,7 +63,6 @@ export function DemoObstacleRoute() {
         updatedAt: now,
       };
       const moveDelay = 520;
-      const sittingDelay = moveDelay + getMoveDurationMs(START, scenario.goal, randomObstacles);
 
       gameBus.emit('agent:event', { type: 'agent:remove', agentId: DEMO_AGENT_ID });
       timeoutsRef.current.push(
@@ -86,14 +87,6 @@ export function DemoObstacleRoute() {
             updatedAt: now + 2,
           });
         }, moveDelay),
-        window.setTimeout(() => {
-          gameBus.emit('agent:event', {
-            type: 'agent:status',
-            agentId: DEMO_AGENT_ID,
-            status: 'sitting',
-            updatedAt: now + 3,
-          });
-        }, sittingDelay),
       );
     },
     [clearDemoTimers, randomObstacles],
@@ -244,16 +237,6 @@ function createBaseBlockedTiles() {
 
 function hasRoute(start: GridPoint, goal: GridPoint, blocked: ReadonlySet<string>) {
   return getShortestPathDistance(start, goal, blocked) !== null;
-}
-
-function getMoveDurationMs(start: GridPoint, goal: GridPoint, obstacles: GridPoint[]) {
-  const blocked = new Set([
-    ...createBaseBlockedTiles(),
-    ...obstacles.map(toGridKey),
-    ...getDeskFootprint(getGoalDesk(goal)).map(toGridKey),
-  ]);
-  const distance = getShortestPathDistance(start, goal, blocked) ?? 0;
-  return Math.max(0, distance - 1) * 220 + 120;
 }
 
 function getShortestPathDistance(start: GridPoint, goal: GridPoint, blocked: ReadonlySet<string>) {

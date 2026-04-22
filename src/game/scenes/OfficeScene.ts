@@ -1,7 +1,15 @@
 import * as Phaser from 'phaser';
 
 import { gameBus, startAgentSync, type AgentSyncController, type Unsubscribe } from '../../bridge/index.js';
-import type { AgentId, AgentStatus, GridPoint } from '../../domain/index.js';
+import {
+  DEFAULT_VIEW_ZOOM,
+  resolvePixelScale,
+  VIEW_ZOOM_REGISTRY_KEY,
+  type AgentId,
+  type AgentStatus,
+  type GridPoint,
+  type ViewZoom,
+} from '../../domain/index.js';
 import { Character, CHARACTER_COUNT } from '../entities/Character.js';
 import { playMatrixDespawnEffect, playMatrixSpawnEffect } from '../effects/MatrixEffect.js';
 import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
@@ -13,11 +21,13 @@ import { DEMO_CHAIR_KEY, DEMO_DESK_KEY, SAMPLE_MAP_KEY } from './BootScene.js';
 const TARGET_TILE_SIZE = 16;
 const MOVE_STEP_DURATION_MS = 220;
 const REPLAN_DELAY_MS = 360;
+const SEAT_DEPTH_OFFSET_PX = 0.5;
 
 export class OfficeScene extends Phaser.Scene {
   private fpsText?: Phaser.GameObjects.Text;
   private agentSyncStop?: Unsubscribe;
   private tilesetSwitchStop?: Unsubscribe;
+  private zoomChangeStop?: Unsubscribe;
   private demoObstacleStop?: Unsubscribe;
   private socialSystem?: SocialSystem;
   private readonly characters = new Map<AgentId, Character>();
@@ -55,13 +65,22 @@ export class OfficeScene extends Phaser.Scene {
     camera.roundPixels = true;
     camera.setBounds(0, 0, worldWidth, worldHeight, true);
     camera.centerOn(worldWidth / 2, worldHeight / 2);
-    camera.setZoom(getIntegerZoom(this.scale.width, this.scale.height, worldWidth, worldHeight));
+    const getCurrentZoom = (): ViewZoom =>
+      (this.game.registry.get(VIEW_ZOOM_REGISTRY_KEY) as ViewZoom | undefined) ?? DEFAULT_VIEW_ZOOM;
+    const applyZoom = (zoom: ViewZoom) => {
+      const viewport = { width: this.scale.width, height: this.scale.height };
+      const world = { width: worldWidth, height: worldHeight };
+      camera.setZoom(resolvePixelScale(zoom, viewport, world));
+      camera.centerOn(worldWidth / 2, worldHeight / 2);
+    };
+    applyZoom(getCurrentZoom());
 
     this.fpsText = this.add.text(12, 12, 'FPS 0', {
       color: '#00ff88',
-      fontFamily: 'monospace',
-      fontSize: '14px',
+      fontFamily: '"Galmuri11", monospace',
+      fontSize: '11px',
     });
+    this.fpsText.setResolution(Math.max(1, Math.ceil((this.cameras.main?.zoom ?? 1) * (window.devicePixelRatio || 1))));
     this.fpsText.setDepth(layers.length + 1);
     this.fpsText.setScrollFactor(0);
     let isActive = true;
@@ -82,17 +101,20 @@ export class OfficeScene extends Phaser.Scene {
         isActive: () => isActive,
       }),
     );
-    const handleResize = (gameSize: Phaser.Structs.Size) => {
-      camera.setZoom(getIntegerZoom(gameSize.width, gameSize.height, worldWidth, worldHeight));
-      camera.centerOn(worldWidth / 2, worldHeight / 2);
+    const handleResize = () => {
+      const zoom = getCurrentZoom();
+      if (zoom !== 'fit') return;
+      applyZoom(zoom);
     };
     const cleanup = () => {
       isActive = false;
       this.agentSyncStop?.();
       this.tilesetSwitchStop?.();
+      this.zoomChangeStop?.();
       this.demoObstacleStop?.();
       this.agentSyncStop = undefined;
       this.tilesetSwitchStop = undefined;
+      this.zoomChangeStop = undefined;
       this.demoObstacleStop = undefined;
       demoObstacleGroup.clear(true, true);
       demoBlocked.clear();
@@ -108,6 +130,9 @@ export class OfficeScene extends Phaser.Scene {
     this.tilesetSwitchStop = gameBus.on('ui:tileset-selected', ({ variantId }) => {
       if (variantId === this.activeVariantId) return;
       this.scene.restart({ variantId });
+    });
+    this.zoomChangeStop = gameBus.on('ui:zoom-changed', ({ scale }) => {
+      applyZoom(scale);
     });
     const demoObstacleGroup = this.add.group();
     this.demoObstacleStop = gameBus.on('demo:obstacles-set', ({ obstacles, goal, seats }) => {
@@ -347,7 +372,7 @@ function setDemoObstacles(
 
     const chairSprite = scene.add.image(tileCenter(seat.x), tileBottom(seat.y), DEMO_CHAIR_KEY);
     chairSprite.setOrigin(0.5, 1);
-    chairSprite.setDepth(getObjectDepth(seat, depth));
+    chairSprite.setDepth(getSeatFurnitureDepth(seat, depth));
     group.add(chairSprite);
 
     const deskSprite = scene.add.image(tileCenter(desk.x), tileBottom(desk.y), DEMO_DESK_KEY);
@@ -355,11 +380,6 @@ function setDemoObstacles(
     deskSprite.setDepth(getObjectDepth(desk, depth));
     group.add(deskSprite);
   });
-}
-
-function getIntegerZoom(viewportWidth: number, viewportHeight: number, worldWidth: number, worldHeight: number) {
-  const fitZoom = Math.min(viewportWidth / worldWidth, viewportHeight / worldHeight);
-  return Math.max(1, Math.floor(fitZoom || TARGET_TILE_SIZE / TARGET_TILE_SIZE));
 }
 
 function moveCharacterAlongPath(
@@ -420,6 +440,10 @@ function updateCharacterDepth(character: Character, baseDepth: number) {
 
 function getObjectDepth(point: GridPoint, baseDepth: number) {
   return baseDepth + tileBottom(point.y) / 10000;
+}
+
+function getSeatFurnitureDepth(point: GridPoint, baseDepth: number) {
+  return baseDepth + (tileBottom(point.y) - SEAT_DEPTH_OFFSET_PX) / 10000;
 }
 
 function getDeskFootprint(anchor: GridPoint): GridPoint[] {
