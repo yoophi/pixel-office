@@ -85,6 +85,7 @@ export class PathfindingSystem {
 export function createPathfindingSystemFromTilemap(
   map: Phaser.Tilemaps.Tilemap,
   blockingLayerNames = ['walls', 'furniture'],
+  extraBlockedKeys?: ReadonlySet<string>,
 ) {
   const blocked = new Set<string>();
 
@@ -101,7 +102,11 @@ export function createPathfindingSystemFromTilemap(
     });
   });
 
-  return new PathfindingSystem(map.width, map.height, (point) => !blocked.has(toKey(point)));
+  return new PathfindingSystem(
+    map.width,
+    map.height,
+    (point) => !blocked.has(toKey(point)) && !extraBlockedKeys?.has(toKey(point)),
+  );
 }
 
 function toPath(goal: SearchNode): PathNode[] {

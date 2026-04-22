@@ -32,6 +32,7 @@ export class Character {
   readonly sprite: Phaser.GameObjects.Sprite;
   direction: Direction;
   status: CharacterAnimationStatus;
+  private destroyed = false;
 
   constructor(scene: Phaser.Scene, config: CharacterConfig) {
     this.id = config.id;
@@ -46,29 +47,36 @@ export class Character {
   }
 
   setDepth(depth: number) {
+    if (this.destroyed) return;
     this.sprite.setDepth(depth);
   }
 
   setPosition(x: number, y: number) {
+    if (this.destroyed) return;
     this.sprite.setPosition(x, y);
   }
 
   setDirection(direction: Direction) {
     this.direction = direction;
+    if (this.destroyed) return;
     this.sprite.setFlipX(direction === 'west');
     this.playCurrentAnimation();
   }
 
   setStatus(status: CharacterAnimationStatus) {
     this.status = status;
+    if (this.destroyed) return;
     this.playCurrentAnimation();
   }
 
   destroy() {
+    if (this.destroyed) return;
+    this.destroyed = true;
     this.sprite.destroy();
   }
 
   private playCurrentAnimation() {
+    if (this.destroyed || !this.sprite.scene || !this.sprite.active) return;
     const animationDirection = this.direction === 'west' ? 'east' : this.direction;
     const key = getAnimationKey(this.sprite.texture.key, this.status, animationDirection);
 
@@ -78,7 +86,9 @@ export class Character {
       return;
     }
 
-    this.sprite.play(key, true);
+    if (this.sprite.scene.anims.exists(key)) {
+      this.sprite.play(key, true);
+    }
   }
 }
 

@@ -34,6 +34,7 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 - [`memory/v2-gaps.md`](memory/v2-gaps.md) — v2 스택 머지 이후 계획 대비 갭 분석. 후속 GitHub 이슈의 원본.
 - [`memory/tiled-schema.md`](memory/tiled-schema.md) — Tiled 맵 레이어·타일셋 규약 (v2 Phaser + Tiled 파이프라인).
 - [`memory/stacked-pr-workflow.md`](memory/stacked-pr-workflow.md) — Stacked PR 머지 시 충돌 방지 가이드 (squash merge + chained branches 문제와 대응).
+- [`memory/phaser-react-lifecycle-notes.md`](memory/phaser-react-lifecycle-notes.md) — React route/HMR/StrictMode와 Phaser Scene/Tween/Texture 생명주기 충돌 주의사항.
 
 미래의 에이전트가 알아야 할 프로젝트 수준의 사실(아키텍처 결정, 마이그레이션 상태, 외부 제약 등)을 새로 알게 되면 `memory/<topic>.md`를 추가하고 여기에 링크합니다.
 

@@ -1,4 +1,4 @@
-import type { AgentEvent, AgentId } from '../domain/index.js';
+import type { AgentEvent, AgentId, GridPoint } from '../domain/index.js';
 
 export type Unsubscribe = () => void;
 
@@ -9,6 +9,7 @@ export interface PixelOfficeGameEvents extends GameBusEventMap {
   'game:ready': { readyAt: number };
   'ui:agent-selected': { agentId: AgentId | null };
   'ui:tileset-selected': { variantId: string };
+  'demo:obstacles-set': { obstacles: GridPoint[]; goal?: GridPoint };
 }
 
 export class GameBus<Events extends GameBusEventMap> {

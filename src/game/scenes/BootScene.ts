@@ -5,6 +5,8 @@ import { preloadTiledMapAssets } from '../tiled/loader.js';
 
 export const SAMPLE_MAP_KEY = 'sample-office';
 export const SAMPLE_MAP_URL = '/maps/sample.tmj';
+export const DEMO_CHAIR_KEY = 'demo-chair-right';
+export const DEMO_DESK_KEY = 'demo-desk-vertical';
 
 export class BootScene extends Phaser.Scene {
   private fpsText?: Phaser.GameObjects.Text;
@@ -19,6 +21,8 @@ export class BootScene extends Phaser.Scene {
       mapUrl: SAMPLE_MAP_URL,
     });
     preloadCharacterAssets(this);
+    this.load.image(DEMO_CHAIR_KEY, '/assets/furniture/chairs/CHAIR_CUSHIONED_RIGHT.png');
+    this.load.image(DEMO_DESK_KEY, '/assets/furniture/desks/TABLE_WOOD_VERTICAL.png');
   }
 
   create() {

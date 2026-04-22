@@ -1,11 +1,11 @@
-import type { Agent, AgentEvent, AgentId, AgentStatus, GridPoint, SeatId } from '../domain/index.js';
+import type { Agent, AgentEvent, AgentId, AgentStatus, Direction, GridPoint, SeatId } from '../domain/index.js';
 import { gameBus, type GameBus, type PixelOfficeGameEvents, type Unsubscribe } from './gameBus.js';
 
 export interface AgentSyncController {
   upsertAgent(agent: Agent): void;
   removeAgent(agentId: AgentId): void;
   setAgentStatus(agentId: AgentId, status: AgentStatus): void;
-  moveAgent(agentId: AgentId, destination: GridPoint): void;
+  moveAgent(agentId: AgentId, destination: GridPoint, finalDirection?: Direction): void;
   assignSeat(agentId: AgentId, seatId: SeatId | null): void;
   showSpeech(agentId: AgentId, message: string, durationMs: number): void;
 }
@@ -46,7 +46,7 @@ export class AgentSync {
         this.controller.setAgentStatus(event.agentId, event.status);
         break;
       case 'agent:move':
-        this.controller.moveAgent(event.agentId, event.destination);
+        this.controller.moveAgent(event.agentId, event.destination, event.direction);
         break;
       case 'agent:seat':
         this.controller.assignSeat(event.agentId, event.seatId);
