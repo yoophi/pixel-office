@@ -38,6 +38,7 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 - [`memory/demo-routes-and-canvas-controls.md`](memory/demo-routes-and-canvas-controls.md) — demo route 목록, floating navigation, 공통 Phaser canvas toolbar 규칙.
 - [`memory/phaser-depth-and-pathfinding-notes.md`](memory/phaser-depth-and-pathfinding-notes.md) — Phaser depth 정렬, 가구 footprint, 동적 장애물, 경로 재계산, 좌석 상태 규칙.
 - [`memory/canvas-rendering.md`](memory/canvas-rendering.md) — 게임 캔버스 줌/픽셀 매치 현재 파이프라인과 한계, 관련 설정이 있는 파일 위치.
+- [`memory/speech-bubble-and-random-demo-rules.md`](memory/speech-bubble-and-random-demo-rules.md) — 말풍선 렌더링·텍스트 스트리밍·랜덤 오피스 이동/resize 규칙.
 
 미래의 에이전트가 알아야 할 프로젝트 수준의 사실(아키텍처 결정, 마이그레이션 상태, 외부 제약 등)을 새로 알게 되면 `memory/<topic>.md`를 추가하고 여기에 링크합니다.
 
