@@ -1,4 +1,21 @@
 @font-face {
+  font-family: "FS Pixel Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("/assets/fonts/FSPixelSansUnicode-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "FS Pixel Sans Matched";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("/assets/fonts/FSPixelSansUnicode-Regular.ttf") format("truetype");
+  size-adjust: 204%;
+}
+
+@font-face {
   font-family: Pretendard;
   font-style: normal;
   font-weight: 45 920;
@@ -33,7 +50,8 @@
 
 :root {
   font-family:
-    "IBM Plex Sans",
+    "FS Pixel Sans",
+    "Galmuri11",
     "Pretendard",
     "Noto Sans KR",
     sans-serif;

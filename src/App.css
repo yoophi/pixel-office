@@ -45,7 +45,7 @@
 .game-canvas-toolbar p {
   margin: 0;
   color: #f6d77b;
-  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: "FS Pixel Sans", "Galmuri11", monospace;
   font-size: 11px;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -154,7 +154,7 @@
 .demo-panel__eyebrow {
   margin: 4px 0 0;
   color: #f6d77b;
-  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: "FS Pixel Sans", "Galmuri11", monospace;
   font-size: 12px;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -267,7 +267,7 @@
 .demo-nav p {
   margin: 0 0 8px;
   color: #f6d77b;
-  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  font-family: "FS Pixel Sans", "Galmuri11", monospace;
   font-size: 11px;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -383,16 +383,16 @@
   position: relative;
   z-index: 1;
   display: grid;
-  gap: 2px;
+  gap: 0;
   min-width: 208px;
   padding: 11px 14px;
   color: #111827;
   background: #ffffff;
   border: 1px solid #111827;
   border-radius: 6px;
-  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  font-family: "FS Pixel Sans Matched", "Galmuri11", "Pretendard", "Noto Sans KR", sans-serif;
   font-size: 11px;
-  line-height: 1.45;
+  line-height: 1.2;
   text-align: center;
   transform: translateY(-22px);
 }
@@ -429,6 +429,14 @@
   height: 100vh;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+}
+
+.random-office-demo .demo-nav p {
+  font-size: 13px;
+}
+
+.random-office-demo .demo-nav a {
+  font-size: 14px;
 }
 
 .demo-actions button {

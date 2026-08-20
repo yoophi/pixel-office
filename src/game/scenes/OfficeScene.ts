@@ -77,7 +77,7 @@ export class OfficeScene extends Phaser.Scene {
 
     this.fpsText = this.add.text(12, 12, 'FPS 0', {
       color: '#00ff88',
-      fontFamily: '"Galmuri11", monospace',
+      fontFamily: '"FS Pixel Sans", "Galmuri11", monospace',
       fontSize: '11px',
     });
     this.fpsText.setResolution(Math.max(1, Math.ceil((this.cameras.main?.zoom ?? 1) * (window.devicePixelRatio || 1))));

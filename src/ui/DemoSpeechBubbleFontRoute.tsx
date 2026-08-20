@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import { DemoNavigation } from './DemoNavigation.js';
 
-const sampleMessage = 'Pretendard 말풍선\n한글 English 1234';
+const sampleMessage = 'FS Pixel Sans 말풍선\n한글 English 1234';
+const speechFontFamily = '"FS Pixel Sans Matched", "Galmuri11", Pretendard, "Noto Sans KR", sans-serif';
 
 export function DemoSpeechBubbleFontRoute() {
   const largerFontCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -108,13 +109,14 @@ function drawCanvasBubble(canvas: HTMLCanvasElement | null, options: DrawCanvasB
   context.fill();
   context.stroke();
   context.fillStyle = '#111827';
-  context.font = `${options.fontSize}px Pretendard, "Noto Sans KR", sans-serif`;
+  context.font = `${options.fontSize}px ${speechFontFamily}`;
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText(sampleMessage.split('\n')[0], 150, 56);
-  context.fillText(sampleMessage.split('\n')[1], 150, 74);
+  const lineHeight = options.fontSize * 1.2;
+  context.fillText(sampleMessage.split('\n')[0], 150, 63 - lineHeight / 2);
+  context.fillText(sampleMessage.split('\n')[1], 150, 63 + lineHeight / 2);
   context.fillStyle = '#f6d77b';
-  context.font = '700 12px Pretendard, "Noto Sans KR", sans-serif';
+  context.font = `700 12px ${speechFontFamily}`;
   context.textAlign = 'left';
   context.fillText(`case ${options.label}`, 12, 18);
 }
