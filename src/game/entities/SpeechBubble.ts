@@ -10,6 +10,7 @@ export interface SpeechBubbleConfig {
   textPaddingTopPx?: number;
   textOffsetYPx?: number;
   bubbleHeightAdjustmentPx?: number;
+  textAlphaThreshold?: number;
 }
 
 export class SpeechBubble {
@@ -37,6 +38,7 @@ export class SpeechBubble {
   private readonly text: Phaser.GameObjects.Text;
   private readonly target: Phaser.GameObjects.Sprite;
   private readonly bubbleHeightAdjustmentPx: number;
+  private readonly textAlphaThreshold?: number;
   private expiresAt: number;
   private lastTextureResolution = 0;
   private bubbleHeight = 0;
@@ -45,6 +47,7 @@ export class SpeechBubble {
     this.scene = scene;
     this.target = config.target;
     this.bubbleHeightAdjustmentPx = config.bubbleHeightAdjustmentPx ?? 0;
+    this.textAlphaThreshold = config.textAlphaThreshold;
     this.expiresAt = scene.time.now + config.durationMs;
     const fontSizePx = config.fontSizePx ?? SpeechBubble.defaultFontSizePx;
 
@@ -161,5 +164,17 @@ export class SpeechBubble {
     if (!forceRedraw && target === this.lastTextureResolution) return;
     this.lastTextureResolution = target;
     this.text.setResolution(target);
+    this.applyTextAlphaThreshold();
+  }
+
+  private applyTextAlphaThreshold() {
+    if (this.textAlphaThreshold === undefined) return;
+    const { canvas, context } = this.text;
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let index = 3; index < image.data.length; index += 4) {
+      image.data[index] = image.data[index] >= this.textAlphaThreshold ? 255 : 0;
+    }
+    context.putImageData(image, 0, 0);
+    this.text.frame.source.update();
   }
 }
