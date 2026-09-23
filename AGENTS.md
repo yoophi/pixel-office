@@ -42,6 +42,8 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 - [`memory/fs-pixel-sans-sizing.md`](memory/fs-pixel-sans-sizing.md) — FS Pixel Sans의 내부 격자와 CSS/Phaser 폰트 크기 선정 기준.
 - [`memory/munder-difflin-design-assets.md`](memory/munder-difflin-design-assets.md) — Munder Difflin의 목표·구조·디자인 자산·라이선스와 재사용 판단.
 
+- [`memory/pixel-agents-assets.md`](memory/pixel-agents-assets.md) — Pixel Agents 원본 에셋 이관 범위와 기존 카탈로그의 형식 차이.
+
 미래의 에이전트가 알아야 할 프로젝트 수준의 사실(아키텍처 결정, 마이그레이션 상태, 외부 제약 등)을 새로 알게 되면 `memory/<topic>.md`를 추가하고 여기에 링크합니다.
 
 ## 작업 규칙
