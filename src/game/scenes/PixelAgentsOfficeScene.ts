@@ -149,7 +149,7 @@ export class PixelAgentsOfficeScene extends Phaser.Scene {
     for (const y of [4, 9, 14]) {
       for (const x of [15, 22, 29]) {
         this.place('desk', x, y, 1);
-        this.place('pc', x + 1, y + 0.5, 0, true).setDepth((y + 2) * TILE + 1);
+        this.place('pc', x + 1, y, 0, true).setDepth((y + 2) * TILE + 1);
         this.place('chair', x + 1, y + 2);
         if (index % 3 !== 2) {
           this.character(index, { x: x + 1, y: y + 2 }, true);

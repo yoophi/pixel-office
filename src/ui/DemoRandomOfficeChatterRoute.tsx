@@ -48,7 +48,6 @@ const furnitureAssets = [
 
 type FurnitureKey = (typeof furnitureAssets)[number]['key'];
 
-const workstationDeskAssets = ['random-furniture-table', 'random-furniture-table-lg'] as const;
 const supportFurnitureAssets = [
   'random-furniture-plant-1',
   'random-furniture-plant-2',
@@ -273,9 +272,9 @@ class RandomOfficeChatterScene extends Phaser.Scene {
 
   private placeWorkstation(anchor: GridPoint, facing: 'south' | 'east') {
     if (facing === 'south') {
-      this.addFurniture(anchor, pickRandom(workstationDeskAssets));
+      this.addFurniture(anchor, 'random-furniture-table-lg');
       this.addFurniture({ x: anchor.x, y: anchor.y + 1 }, 'random-furniture-chair-back');
-      this.add.image(tileCenter(anchor.x), tileBottom(anchor.y) + 8 * PIXEL_VIEW_SCALE, 'random-pc')
+      this.add.image(tileCenter(anchor.x), tileBottom(anchor.y), 'random-pc')
         .setOrigin(0.5, 1).setScale(PIXEL_VIEW_SCALE).setDepth(getDepth(tileBottom(anchor.y)) + 0.0001);
       return;
     }
