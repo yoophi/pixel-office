@@ -95,7 +95,7 @@ interface GameCanvasToolbarProps {
   setZoom(zoom: ViewZoom): void;
 }
 
-function GameCanvasToolbar({ zoom, canvasSize, setZoom }: GameCanvasToolbarProps) {
+export function GameCanvasToolbar({ zoom, canvasSize, setZoom }: GameCanvasToolbarProps) {
   return (
     <div className="game-canvas-toolbar" aria-label="게임 캔버스 줌">
       <p>Pixel Zoom</p>

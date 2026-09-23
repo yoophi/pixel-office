@@ -500,3 +500,41 @@
     grid-template-columns: 1fr;
   }
 }
+
+.pixel-office-demo {
+  background: #18221f;
+}
+
+.pixel-office-host {
+  flex: 0 0 auto;
+}
+
+.pixel-office-host canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.pixel-office-caption {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  display: grid;
+  gap: 6px;
+  padding: 12px 16px;
+  color: #dae3d8;
+  background: rgba(18, 30, 26, 0.92);
+  border: 1px solid #59675a;
+  font-family: 'Galmuri11', monospace;
+  font-size: 12px;
+  line-height: 18px;
+  pointer-events: none;
+}
+
+.pixel-office-caption strong,
+.pixel-office-caption small {
+  font: inherit;
+}
+
+.pixel-office-caption small {
+  color: #a7b7a5;
+}

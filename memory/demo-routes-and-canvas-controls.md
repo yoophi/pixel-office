@@ -7,6 +7,7 @@
 - 데모 화면은 `HashRouter` 기반의 `/demo/*` 라우트로 제공합니다.
 - 라우트 목록과 네비게이션 메타데이터는 `src/ui/demoRoutes.ts`에서 관리합니다.
 - 현재 데모 라우트는 다음 흐름을 검증합니다.
+  - `/demo/pixel-agents-office`: 새 Pixel Agents 에셋을 사용하는 업무 공간·회의실·라운지. 전용 씬과 공통 줌 툴바를 사용합니다.
   - `/demo/obstacle-walking`: 장애물 회피와 의자/책상 목표 배치.
   - `/demo/agent-collision`: 캐릭터 간 충돌 회피.
   - `/demo/agent-crowd-collision`: 주변 캐릭터가 무작위로 움직일 때 경로 재계산.

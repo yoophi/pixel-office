@@ -8,6 +8,7 @@ import { DemoObstacleRoute } from './ui/DemoObstacleRoute.js';
 import { DemoRandomOfficeChatterRoute } from './ui/DemoRandomOfficeChatterRoute.js';
 import { DemoSpeechBubbleFontRoute } from './ui/DemoSpeechBubbleFontRoute.js';
 import { DemoSpeechBubbleRoute } from './ui/DemoSpeechBubbleRoute.js';
+import { DemoPixelAgentsOfficeRoute } from './ui/DemoPixelAgentsOfficeRoute.js';
 import { demoRoutes } from './ui/demoRoutes.js';
 
 function App() {
@@ -18,6 +19,10 @@ const router = createHashRouter([
   {
     path: '/',
     element: <DemoRandomOfficeChatterRoute />,
+  },
+  {
+    path: '/demo/pixel-agents-office',
+    element: <DemoPixelAgentsOfficeRoute />,
   },
   {
     path: '/demo/obstacle-walking',

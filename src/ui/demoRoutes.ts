@@ -1,4 +1,5 @@
 export const demoRoutes = [
+  { path: '/demo/pixel-agents-office', label: '픽셀 오피스' },
   { path: '/demo/obstacle-walking', label: '장애물 회피' },
   { path: '/demo/agent-collision', label: '캐릭터 회피' },
   { path: '/demo/agent-crowd-collision', label: '움직이는 군중' },
