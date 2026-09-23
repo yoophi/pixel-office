@@ -13,7 +13,6 @@ const MAP_WIDTH = 20;
 const MAP_HEIGHT = 11;
 const START: GridPoint = { x: 2, y: 8 };
 const GOAL: GridPoint = { x: 16, y: 5 };
-const STEP_DURATION_MS = 220;
 const RUNNER_REST_MS = 2000;
 
 type Walker = {
@@ -33,7 +32,7 @@ export function DemoAgentCrowdCollisionRoute() {
   const walkersRef = useRef(initialWalkers);
   const runnerPositionRef = useRef(START);
   const runnerTargetRef = useRef(GOAL);
-  const busyUntilRef = useRef(new Map<AgentId, number>());
+  const pendingMovesRef = useRef(new Map<AgentId, GridPoint>());
   const timersRef = useRef<number[]>([]);
   const gameReadyRef = useRef(false);
 
@@ -51,7 +50,7 @@ export function DemoAgentCrowdCollisionRoute() {
   const spawnDemo = useCallback(
     (nextWalkers = createRandomWalkers()) => {
       clearTimers();
-      busyUntilRef.current.clear();
+      pendingMovesRef.current.clear();
       walkersRef.current = nextWalkers;
       setWalkers(nextWalkers);
       runnerPositionRef.current = START;
@@ -107,7 +106,15 @@ export function DemoAgentCrowdCollisionRoute() {
     };
     const unsubscribe = gameBus.on('game:ready', startOnce);
     const unsubscribeMoveComplete = gameBus.on('agent:move-complete', ({ agentId, destination }) => {
-      if (agentId !== RUNNER_AGENT_ID) return;
+      if (agentId !== RUNNER_AGENT_ID) {
+        if (!pendingMovesRef.current.has(agentId)) return;
+        pendingMovesRef.current.delete(agentId);
+        walkersRef.current = walkersRef.current.map((walker) =>
+          walker.id === agentId ? { ...walker, position: destination } : walker,
+        );
+        setWalkers(walkersRef.current);
+        return;
+      }
       if (!isSeatTile(destination)) return;
 
       runnerPositionRef.current = destination;
@@ -197,7 +204,7 @@ export function DemoAgentCrowdCollisionRoute() {
 
   function moveRandomWalker() {
     const now = Date.now();
-    const available = walkersRef.current.filter((walker) => (busyUntilRef.current.get(walker.id) ?? 0) <= now);
+    const available = walkersRef.current.filter((walker) => !pendingMovesRef.current.has(walker.id));
     const walker = pickRandom(available);
     if (!walker) return;
 
@@ -211,11 +218,10 @@ export function DemoAgentCrowdCollisionRoute() {
     );
     if (pathLength === null) return;
 
-    const durationMs = Math.max(1, pathLength) * STEP_DURATION_MS;
     const direction = getDirection(walker.position, target);
-    busyUntilRef.current.set(walker.id, now + durationMs + 220);
+    pendingMovesRef.current.set(walker.id, target);
     walkersRef.current = walkersRef.current.map((item) =>
-      item.id === walker.id ? { ...item, position: target, direction } : item,
+      item.id === walker.id ? { ...item, direction } : item,
     );
     setWalkers(walkersRef.current);
 
@@ -226,11 +232,6 @@ export function DemoAgentCrowdCollisionRoute() {
       direction,
       updatedAt: now,
     });
-    timersRef.current.push(
-      window.setTimeout(() => {
-        busyUntilRef.current.delete(walker.id);
-      }, durationMs + 80),
-    );
   }
 
   function moveRunnerToTarget() {
@@ -254,9 +255,10 @@ export function DemoAgentCrowdCollisionRoute() {
   }
 
   function getWalkerTargets(walker: Walker) {
+    const blocked = getBlockedTiles({ excludeAgentId: walker.id, includeRunner: true });
     return getWalkableTiles().filter((point) => {
       const key = toGridKey(point);
-      return key !== toGridKey(walker.position) && !isSeatTile(point) && !isDeskTile(point);
+      return key !== toGridKey(walker.position) && !blocked.has(key) && !isSeatTile(point) && !isDeskTile(point);
     });
   }
 
@@ -266,6 +268,10 @@ export function DemoAgentCrowdCollisionRoute() {
       if (walker.id !== options.excludeAgentId) {
         blocked.add(toGridKey(walker.position));
       }
+    });
+
+    pendingMovesRef.current.forEach((target, agentId) => {
+      if (agentId !== options.excludeAgentId) blocked.add(toGridKey(target));
     });
 
     if (options.includeRunner && options.excludeAgentId !== RUNNER_AGENT_ID) {
@@ -323,7 +329,7 @@ function getShortestPathDistance(start: GridPoint, goal: GridPoint, blocked: Rea
     getNeighborTiles(current).forEach((next) => {
       const key = toGridKey(next);
       if (isBoundary(next) || visited.has(key)) return;
-      if (blocked.has(key) && !(next.x === goal.x && next.y === goal.y)) return;
+      if (blocked.has(key)) return;
 
       visited.add(key);
       distances.set(key, distance + 1);

@@ -41,7 +41,6 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 - [`memory/speech-bubble-and-random-demo-rules.md`](memory/speech-bubble-and-random-demo-rules.md) — 말풍선 렌더링·텍스트 스트리밍·랜덤 오피스 이동/resize 규칙.
 - [`memory/fs-pixel-sans-sizing.md`](memory/fs-pixel-sans-sizing.md) — FS Pixel Sans의 내부 격자와 CSS/Phaser 폰트 크기 선정 기준.
 - [`memory/munder-difflin-design-assets.md`](memory/munder-difflin-design-assets.md) — Munder Difflin의 목표·구조·디자인 자산·라이선스와 재사용 판단.
-
 - [`memory/pixel-agents-assets.md`](memory/pixel-agents-assets.md) — Pixel Agents 원본 에셋 이관 범위와 기존 카탈로그의 형식 차이.
 
 미래의 에이전트가 알아야 할 프로젝트 수준의 사실(아키텍처 결정, 마이그레이션 상태, 외부 제약 등)을 새로 알게 되면 `memory/<topic>.md`를 추가하고 여기에 링크합니다.
@@ -65,4 +64,4 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 
 ## 테스트 현실
 
-자동화 테스트 스위트는 없습니다. 검증은 시각적 확인입니다 — `npm run dev`로 브라우저에서 실행해 변경 사항을 사용해봅니다. 시각적으로 확인 불가능한 변경이라면 "성공"이라고 주장하지 말고 그 사실을 명시합니다.
+충돌 이동의 최소 회귀 검사는 `node --test tests/agent-collision.test.mjs`로 실행합니다. Phaser tween·타이머를 대체한 controller 검사이므로 실제 렌더링 검증은 포함하지 않습니다. 시각적 검증은 `npm run dev`로 브라우저에서 실행해 변경 사항을 사용해봅니다. 시각적으로 확인 불가능한 변경이라면 "성공"이라고 주장하지 말고 그 사실을 명시합니다.

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import * as Phaser from 'phaser';
 
+import { isOccupiedByOtherAgent } from '../domain/agentOccupancy.js';
+
 import type { GridPoint } from '../domain/index.js';
 import { Character, CHARACTER_COUNT, preloadCharacterAssets } from '../game/entities/Character.js';
 import { SpeechBubble } from '../game/entities/SpeechBubble.js';
@@ -158,7 +160,8 @@ export function DemoRandomOfficeChatterRoute() {
 class RandomOfficeChatterScene extends Phaser.Scene {
   private readonly agents: DemoAgent[] = [];
   private readonly blockedTiles = new Set<string>();
-  private readonly reservedTiles = new Map<DemoAgent, string>();
+  private readonly agentTiles = new Map<string, GridPoint>();
+  private readonly reservedTiles = new Map<string, GridPoint>();
   private worldWidth = 0;
   private worldHeight = 0;
   private floor?: Phaser.GameObjects.Graphics;
@@ -182,7 +185,18 @@ class RandomOfficeChatterScene extends Phaser.Scene {
     this.drawFloor();
     this.spawnAgents();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.handleResize, this);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off(Phaser.Scale.Events.RESIZE, this.handleResize, this);
+      this.agents.forEach((agent) => {
+        this.tweens.killTweensOf(agent.character.sprite);
+        this.clearStreamTimers(agent);
+        agent.bubble?.destroy();
+        agent.character.destroy();
+      });
+      this.agents.length = 0;
+      this.agentTiles.clear();
+      this.reservedTiles.clear();
+    });
   }
 
   update(time: number) {
@@ -327,12 +341,14 @@ class RandomOfficeChatterScene extends Phaser.Scene {
   private spawnAgents() {
     this.agents.forEach((agent) => {
       this.tweens.killTweensOf(agent.character.sprite);
-      this.reservedTiles.delete(agent);
+      this.reservedTiles.delete(agent.character.id);
       this.clearStreamTimers(agent);
       agent.bubble?.destroy();
       agent.character.destroy();
     });
     this.agents.length = 0;
+    this.agentTiles.clear();
+    this.reservedTiles.clear();
 
     for (let index = 0; index < AGENT_COUNT; index += 1) {
       const tile = this.getRandomOpenTile();
@@ -356,6 +372,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
         streamTimers: [],
       };
       this.agents.push(agent);
+      this.agentTiles.set(character.id, tile);
       this.moveAgentToRandomDestination(agent);
     }
   }
@@ -419,7 +436,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
     const [next, ...remaining] = path;
     if (!next) {
       agent.moving = false;
-      this.reservedTiles.delete(agent);
+      this.reservedTiles.delete(agent.character.id);
       agent.character.setStatus('idle');
       this.time.delayedCall(Phaser.Math.Between(250, 1100), () => this.moveAgentToRandomDestination(agent));
       return;
@@ -427,14 +444,14 @@ class RandomOfficeChatterScene extends Phaser.Scene {
 
     if (!this.isAvailableForAgent(agent, next)) {
       agent.moving = false;
-      this.reservedTiles.delete(agent);
+      this.reservedTiles.delete(agent.character.id);
       agent.character.setStatus('idle');
       this.time.delayedCall(REPLAN_DELAY_MS, () => this.moveAgentToRandomDestination(agent));
       return;
     }
 
     agent.moving = true;
-    this.reservedTiles.set(agent, toTileKey(next));
+    this.reservedTiles.set(agent.character.id, next);
     agent.character.setDirection(next.direction);
     agent.character.setStatus('walking');
     this.tweens.add({
@@ -446,7 +463,8 @@ class RandomOfficeChatterScene extends Phaser.Scene {
       onUpdate: () => agent.character.setDepth(getDepth(agent.character.sprite.y)),
       onComplete: () => {
         agent.tile = { x: next.x, y: next.y };
-        this.reservedTiles.delete(agent);
+        this.agentTiles.set(agent.character.id, agent.tile);
+        this.reservedTiles.delete(agent.character.id);
         agent.character.setDepth(getDepth(agent.character.sprite.y));
         this.tryGreetNearbyAgent(agent);
         this.moveAgentAlongPath(agent, remaining);
@@ -500,7 +518,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
         x: Phaser.Math.Between(1, Math.max(1, this.gridWidth - 2)),
         y: Phaser.Math.Between(2, Math.max(2, this.gridHeight - 2)),
       };
-      if (this.isOpenTile(point)) return point;
+      if (this.isOpenTile(point) && !isOccupiedByOtherAgent(this.agentTiles, this.reservedTiles, undefined, point)) return point;
     }
     return undefined;
   }
@@ -543,12 +561,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
 
   private isAvailableForAgent(agent: DemoAgent, point: GridPoint) {
     if (!this.isOpenTile(point)) return false;
-    const key = toTileKey(point);
-
-    return this.agents.every((other) => {
-      if (other === agent) return true;
-      return toTileKey(other.tile) !== key && this.reservedTiles.get(other) !== key;
-    });
+    return !isOccupiedByOtherAgent(this.agentTiles, this.reservedTiles, agent.character.id, point);
   }
 
   private isInsideGrid(point: GridPoint) {

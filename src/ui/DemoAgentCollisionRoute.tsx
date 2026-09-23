@@ -29,6 +29,22 @@ const scenarios = [
     blockerCount: 6,
     message: 'rerouting',
   },
+  {
+    id: 'occupied-goal',
+    label: '목적지 점유 대기',
+    start: { x: 8, y: 8 },
+    goal: { x: 10, y: 8 },
+    blockerCount: 1,
+    message: 'waiting',
+  },
+  {
+    id: 'shared-goal',
+    label: '동시 진입 차단',
+    start: { x: 8, y: 8 },
+    goal: { x: 10, y: 8 },
+    blockerCount: 1,
+    message: 'reserved',
+  },
 ] as const;
 
 type Scenario = (typeof scenarios)[number];
@@ -126,6 +142,16 @@ export function DemoAgentCollisionRoute() {
           });
         }, 680),
       );
+      if (scenario.id === 'occupied-goal' || scenario.id === 'shared-goal') {
+        timeoutsRef.current.push(window.setTimeout(() => {
+          gameBus.emit('agent:event', {
+            type: 'agent:move',
+            agentId: getBlockerId(0),
+            destination: scenario.id === 'occupied-goal' ? { x: 14, y: 8 } : scenario.goal,
+            updatedAt: Date.now(),
+          });
+        }, scenario.id === 'occupied-goal' ? 4500 : 680));
+      }
     },
     [clearDemoTimers, removeDemoAgents],
   );
@@ -170,7 +196,9 @@ export function DemoAgentCollisionRoute() {
           </button>
           <p className="demo-panel__eyebrow">Agent Avoidance</p>
           <h1>캐릭터 충돌 회피</h1>
-          <p>이동 캐릭터가 다른 캐릭터가 점유한 타일을 동적 장애물로 보고 우회합니다.</p>
+          <p>현재 위치와 다음 이동 칸은 다른 캐릭터가 통과할 수 없습니다. 목적지가 점유되어 있으면 비워질 때까지 기다립니다.</p>
+          {activeScenario.id === 'occupied-goal' && <p>4.5초 뒤 목적지의 캐릭터가 자리를 비우면 이동을 재개합니다.</p>}
+          {activeScenario.id === 'shared-goal' && <p>두 캐릭터가 같은 의자로 이동합니다. 먼저 도착한 캐릭터만 진입하고 다른 캐릭터는 기다립니다.</p>}
         </div>
 
         <div className="demo-map" aria-hidden="true">
@@ -232,6 +260,9 @@ function createRandomBlockersByScenario() {
 }
 
 function createRandomBlockers(scenario: Scenario): DemoBlocker[] {
+  if (scenario.id === 'occupied-goal' || scenario.id === 'shared-goal') {
+    return toDemoBlockers([scenario.id === 'occupied-goal' ? scenario.goal : { x: 12, y: 8 }]);
+  }
   const candidates = getWalkableCandidates(scenario);
   const fixedBlocked = new Set([...furnitureTiles, ...getDeskFootprint(getGoalDesk(scenario)).map(toGridKey)]);
 

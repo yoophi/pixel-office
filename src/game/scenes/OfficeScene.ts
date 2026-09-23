@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
 
+import { isOccupiedByOtherAgent } from '../../domain/agentOccupancy.js';
+
 import { gameBus, startAgentSync, type AgentSyncController, type Unsubscribe } from '../../bridge/index.js';
 import {
   DEFAULT_VIEW_ZOOM,
@@ -49,7 +51,7 @@ export class OfficeScene extends Phaser.Scene {
     });
     const demoBlocked = new Set<string>();
     const isDemoBlocked = (point: GridPoint) => demoBlocked.has(toGridKey(point));
-    const pathfinding = createPathfindingSystemFromTilemap(map, undefined, isDemoBlocked);
+    const reservedTiles = new Map<AgentId, GridPoint>();
     const seatAssignment = createSeatAssignmentSystemFromTilemap(map);
     const movementTokens = new Map<AgentId, number>();
     this.socialSystem = new SocialSystem(this);
@@ -89,14 +91,14 @@ export class OfficeScene extends Phaser.Scene {
         scene: this,
         characters: this.characters,
         agentTiles: this.agentTiles,
+        reservedTiles,
         characterDepth: layers.length,
         movementTokens,
         seatAssignment,
         socialSystem: this.socialSystem,
-        findPath: (start, goal) => pathfinding.findPath(start, goal),
         findPathAvoidingAgents: (agentId, start, goal) =>
           createPathfindingSystemFromTilemap(map, undefined, (point) =>
-            isDemoBlocked(point) || isOccupiedByOtherAgent(this.agentTiles, agentId, start, goal, point),
+            isDemoBlocked(point) || isOccupiedByOtherAgent(this.agentTiles, reservedTiles, agentId, point),
           ).findPath(start, goal),
         isActive: () => isActive,
       }),
@@ -123,6 +125,7 @@ export class OfficeScene extends Phaser.Scene {
       this.characters.clear();
       this.agentTiles.clear();
       movementTokens.clear();
+      reservedTiles.clear();
       this.scale.off(Phaser.Scale.Events.RESIZE, handleResize);
     };
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, cleanup);
@@ -154,11 +157,11 @@ interface OfficeSceneAgentControllerConfig {
   scene: Phaser.Scene;
   characters: Map<AgentId, Character>;
   agentTiles: Map<AgentId, GridPoint>;
+  reservedTiles: Map<AgentId, GridPoint>;
   characterDepth: number;
   movementTokens: Map<AgentId, number>;
   seatAssignment: SeatAssignmentSystem;
   socialSystem: SocialSystem;
-  findPath(start: GridPoint, goal: GridPoint): PathNode[];
   findPathAvoidingAgents(agentId: AgentId, start: GridPoint, goal: GridPoint): PathNode[];
   isActive(): boolean;
 }
@@ -173,7 +176,10 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
         ensureCharacterVisible(existing);
         existing.setDirection(agent.direction ?? existing.direction);
         existing.setStatus(toCharacterStatus(agent.status));
-        config.agentTiles.set(agent.id, position);
+        const current = config.agentTiles.get(agent.id);
+        if (agent.position && current && (position.x !== current.x || position.y !== current.y)) {
+          moveAgentToPoint(config, agent.id, position, toCharacterStatus(agent.status));
+        }
         return;
       }
 
@@ -206,6 +212,7 @@ function createOfficeSceneAgentController(config: OfficeSceneAgentControllerConf
       }
       config.characters.delete(agentId);
       config.agentTiles.delete(agentId);
+      config.reservedTiles.delete(agentId);
       config.seatAssignment.releaseAgent(agentId);
     },
     setAgentStatus(agentId, status) {
@@ -251,10 +258,9 @@ function moveAgentToPoint(
   const start = config.agentTiles.get(agentId);
   if (!character || !start) return;
 
-  stopCharacterTweens(config.scene, character);
-  config.movementTokens.set(agentId, (config.movementTokens.get(agentId) ?? 0) + 1);
-  moveCharacterAlongPath(config.scene, character, config.findPath(start, destination), config.characterDepth, () => {
-    config.agentTiles.set(agentId, destination);
+  const token = (config.movementTokens.get(agentId) ?? 0) + 1;
+  config.movementTokens.set(agentId, token);
+  moveAgentWithReplanning(config, agentId, destination, token, () => {
     character.setStatus(finalStatus);
   });
 }
@@ -271,6 +277,14 @@ function moveAgentWithReplanning(
   const current = config.agentTiles.get(agentId);
   if (!character || !current) return;
 
+  // 이동 중에는 출발·도착 타일을 모두 유지하고 현재 걸음이 끝난 뒤 새 요청을 처리한다.
+  if (config.reservedTiles.has(agentId)) {
+    config.scene.time.delayedCall(REPLAN_DELAY_MS, () =>
+      moveAgentWithReplanning(config, agentId, destination, token, onComplete),
+    );
+    return;
+  }
+
   if (current.x === destination.x && current.y === destination.y) {
     character.setStatus('idle');
     updateCharacterDepth(character, config.characterDepth);
@@ -281,7 +295,7 @@ function moveAgentWithReplanning(
 
   const path = config.findPathAvoidingAgents(agentId, current, destination);
   const next = path[0];
-  if (!next || isOccupiedByOtherAgent(config.agentTiles, agentId, current, destination, next)) {
+  if (!next || isOccupiedByOtherAgent(config.agentTiles, config.reservedTiles, agentId, next)) {
     character.setStatus('idle');
     config.scene.time.delayedCall(REPLAN_DELAY_MS, () =>
       moveAgentWithReplanning(config, agentId, destination, token, onComplete),
@@ -290,6 +304,7 @@ function moveAgentWithReplanning(
   }
 
   stopCharacterTweens(config.scene, character);
+  config.reservedTiles.set(agentId, next);
   config.scene.tweens.add({
     targets: character.sprite,
     x: tileCenter(next.x),
@@ -302,8 +317,11 @@ function moveAgentWithReplanning(
     },
     onUpdate: () => updateCharacterDepth(character, config.characterDepth),
     onComplete: () => {
+      if (!config.isActive() || config.characters.get(agentId) !== character) return;
       config.agentTiles.set(agentId, next);
+      config.reservedTiles.delete(agentId);
       updateCharacterDepth(character, config.characterDepth);
+      character.setStatus('idle');
       moveAgentWithReplanning(config, agentId, destination, token, onComplete);
     },
   });
@@ -382,45 +400,6 @@ function setDemoObstacles(
   });
 }
 
-function moveCharacterAlongPath(
-  scene: Phaser.Scene,
-  character: Character,
-  path: PathNode[],
-  characterDepth: number,
-  onComplete?: () => void,
-) {
-  stopCharacterTweens(scene, character);
-
-  if (path.length === 0) {
-    updateCharacterDepth(character, characterDepth);
-    character.setStatus('typing');
-    onComplete?.();
-    return;
-  }
-
-  const tweens = path.map((node, index) => ({
-    targets: character.sprite,
-    x: tileCenter(node.x),
-    y: tileBottom(node.y),
-    duration: index === 0 ? 0 : 220,
-    onStart: () => {
-      character.setDirection(node.direction);
-      character.setStatus('walking');
-      updateCharacterDepth(character, characterDepth);
-    },
-    onUpdate: () => updateCharacterDepth(character, characterDepth),
-  }));
-
-  scene.tweens.chain({
-    tweens,
-    onComplete: () => {
-      updateCharacterDepth(character, characterDepth);
-      character.setStatus('typing');
-      onComplete?.();
-    },
-  });
-}
-
 function stopCharacterTweens(scene: Phaser.Scene, character: Character) {
   if (!character.sprite.scene) return;
   scene.tweens.killTweensOf(character.sprite);
@@ -455,23 +434,4 @@ function getDeskFootprint(anchor: GridPoint): GridPoint[] {
 
 function toGridKey(point: GridPoint) {
   return `${point.x}:${point.y}`;
-}
-
-function isOccupiedByOtherAgent(
-  agentTiles: ReadonlyMap<AgentId, GridPoint>,
-  movingAgentId: AgentId,
-  start: GridPoint,
-  goal: GridPoint,
-  point: GridPoint,
-) {
-  if (point.x === start.x && point.y === start.y) return false;
-  if (point.x === goal.x && point.y === goal.y) return false;
-
-  for (const [agentId, occupied] of agentTiles) {
-    if (agentId !== movingAgentId && occupied.x === point.x && occupied.y === point.y) {
-      return true;
-    }
-  }
-
-  return false;
 }
