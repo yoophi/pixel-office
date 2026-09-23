@@ -1,4 +1,5 @@
 import './App.css';
+import { DemoInteriorAssetsRoute } from './ui/DemoInteriorAssetsRoute.js';
 import { Navigate, RouterProvider, createHashRouter } from 'react-router-dom';
 
 import { DemoAgentCrowdCollisionRoute } from './ui/DemoAgentCrowdCollisionRoute.js';
@@ -16,6 +17,7 @@ function App() {
 }
 
 const router = createHashRouter([
+  { path: '/demo/interior-assets', element: <DemoInteriorAssetsRoute /> },
   {
     path: '/',
     element: <DemoRandomOfficeChatterRoute />,

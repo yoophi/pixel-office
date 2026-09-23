@@ -38,3 +38,5 @@
 - 캔버스 크기 변경은 Phaser game config 재생성이 아니라 scale resize로 처리합니다.
 - 툴바가 라우트별 UI와 겹치지 않도록 floating panel 위치를 확인해야 합니다.
 - 새 데모를 추가할 때는 route 링크, cleanup, 공통 navigation, 공통 canvas toolbar 동작을 함께 확인합니다.
+
+- `/demo/interior-assets`: Interior 원본 시트 등록·가구 배치 샘플. 공통 정수 줌 도구 및 원본 에셋 목록을 제공한다.

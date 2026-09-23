@@ -1,6 +1,6 @@
 # Interior 에셋 크기 호환성 조사
 
-2026-09-23, 로컬 원본 `/Users/yoophi/Downloads/Interior`를 조사했다. 파일 이관이나 런타임 변경은 하지 않았다.
+2026-09-23, 로컬 원본 `/Users/yoophi/Downloads/Interior`를 조사했다. 최초 조사 이후 사용자 요청으로 아래 등록·샘플 적용을 완료했다.
 
 ## 판단
 
@@ -79,3 +79,11 @@ PNG 32개(Home 20개, Hospital 4개, Demo 8개)를 확인했다. 모두 8비트 
 - 비교 자료: 위 표의 프로젝트 PNG, `src/game/scenes/BootScene.ts`, `src/game/scenes/PixelAgentsOfficeScene.ts`, `src/ui/DemoRandomOfficeChatterRoute.tsx`, `memory/tiled-schema.md`, `memory/pixel-agents-assets.md`.
 - 원본 폴더에는 PNG와 `.DS_Store`만 있다. 라이선스, README, atlas JSON, Tiled 메타데이터는 발견하지 못했다. 따라서 제작자의 공식 타일 규격·애니메이션 속도·상업적 이용 및 재배포 조건은 이 폴더만으로 확인할 수 없다.
 - 조사 결과는 로컬 파일과 대표 이미지의 관찰에 한정한다. 모든 개별 가구의 프레임 분할 및 인게임 배치 검증을 완료했다는 의미는 아니다.
+
+## 등록 및 샘플 적용
+
+- PNG 32개를 `public/assets/interior/`에 원본 경로·바이트 그대로 이관했다. 원본 시트 24개와 참고 장면 8개를 구분한다.
+- `src/game/assets/interiorAssets.ts`에 id·분류·URL·이미지 크기를 등록했다.
+- `/demo/interior-assets`에서 라운지·탕비실·휴게실을 표시한다. 14개 샘플 프레임(바닥·벽 포함)을 시트 좌표로 정의해 사용하며, 모든 원본 시트를 원본 크기 정보와 함께 열람할 수 있다.
+- 공통 캐릭터 3명은 크기 비교용으로 서 있으며 이동·충돌 시뮬레이션은 없다. 정수 줌과 화면 맞춤은 공통 도구를 사용한다.
+- 전체 개별 가구의 프레임이나 충돌 카탈로그를 완성한 것은 아니다. 샘플에 쓰는 프레임은 `InteriorSampleScene.ts`에 명시한다.
