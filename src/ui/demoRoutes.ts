@@ -6,4 +6,5 @@ export const demoRoutes = [
   { path: '/demo/speech-bubble', label: '말풍선' },
   { path: '/demo/speech-bubble-font', label: '폰트 비교' },
   { path: '/demo/random-office-chatter', label: '랜덤 오피스' },
+  { path: '/demo/pixel-agents-office', label: 'pixel-agents 오피스' },
 ] as const;

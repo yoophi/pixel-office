@@ -5,6 +5,7 @@ import { DemoAgentCrowdCollisionRoute } from './ui/DemoAgentCrowdCollisionRoute.
 import { DemoAgentCollisionRoute } from './ui/DemoAgentCollisionRoute.js';
 import { DemoDepthSortingRoute } from './ui/DemoDepthSortingRoute.js';
 import { DemoObstacleRoute } from './ui/DemoObstacleRoute.js';
+import { DemoPixelAgentsOfficeRoute } from './ui/DemoPixelAgentsOfficeRoute.js';
 import { DemoRandomOfficeChatterRoute } from './ui/DemoRandomOfficeChatterRoute.js';
 import { DemoSpeechBubbleFontRoute } from './ui/DemoSpeechBubbleFontRoute.js';
 import { DemoSpeechBubbleRoute } from './ui/DemoSpeechBubbleRoute.js';
@@ -46,6 +47,10 @@ const router = createHashRouter([
   {
     path: '/demo/random-office-chatter',
     element: <DemoRandomOfficeChatterRoute />,
+  },
+  {
+    path: '/demo/pixel-agents-office',
+    element: <DemoPixelAgentsOfficeRoute />,
   },
   {
     path: '/demo/*',
