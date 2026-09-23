@@ -275,7 +275,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
     if (facing === 'south') {
       this.addFurniture(anchor, pickRandom(workstationDeskAssets));
       this.addFurniture({ x: anchor.x, y: anchor.y + 1 }, 'random-furniture-chair-back');
-      this.add.image(tileCenter(anchor.x), tileBottom(anchor.y) - 8 * PIXEL_VIEW_SCALE, 'random-pc')
+      this.add.image(tileCenter(anchor.x), tileBottom(anchor.y) + 8 * PIXEL_VIEW_SCALE, 'random-pc')
         .setOrigin(0.5, 1).setScale(PIXEL_VIEW_SCALE).setDepth(getDepth(tileBottom(anchor.y)) + 0.0001);
       return;
     }
