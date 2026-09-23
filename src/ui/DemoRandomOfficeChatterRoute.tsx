@@ -21,6 +21,14 @@ const STREAM_RESTART_MAX_MS = 5200;
 const GREETING_CHANCE_PERCENT = 32;
 const GREETING_DURATION_MS = 1800;
 const GREETING_COOLDOWN_MS = 5200;
+const CHATTER_FONT_FAMILY = '"FS Pixel Sans Matched", "Galmuri11", "Pretendard", "Noto Sans KR", sans-serif';
+const CHATTER_FONT_SIZE_PX = 13;
+const CHATTER_LINE_HEIGHT_RATIO = 1.2;
+const CHATTER_TEXT_PADDING_TOP_PX = 1;
+const CHATTER_TEXT_OFFSET_Y_PX = -2;
+const CHATTER_BUBBLE_HEIGHT_ADJUSTMENT_PX = 1;
+// 카메라 확대 없이 13px로 표시하므로 고해상도 텍스처의 반투명 가장자리를 제거합니다.
+const CHATTER_TEXT_ALPHA_THRESHOLD = 128;
 
 const furnitureAssets = [
   { key: 'random-furniture-table', url: '/assets/furniture/desks/TABLE_WOOD.png' },
@@ -377,6 +385,13 @@ class RandomOfficeChatterScene extends Phaser.Scene {
       target: agent.character.sprite,
       message: lines[0],
       durationMs: streamDuration,
+      fontFamily: CHATTER_FONT_FAMILY,
+      fontSizePx: CHATTER_FONT_SIZE_PX,
+      lineHeightRatio: CHATTER_LINE_HEIGHT_RATIO,
+      textPaddingTopPx: CHATTER_TEXT_PADDING_TOP_PX,
+      textOffsetYPx: CHATTER_TEXT_OFFSET_Y_PX,
+      bubbleHeightAdjustmentPx: CHATTER_BUBBLE_HEIGHT_ADJUSTMENT_PX,
+      textAlphaThreshold: CHATTER_TEXT_ALPHA_THRESHOLD,
     });
 
     for (let index = 1; index < lines.length; index += 1) {
@@ -461,6 +476,13 @@ class RandomOfficeChatterScene extends Phaser.Scene {
       target: agent.character.sprite,
       message: pickRandom(greetings),
       durationMs: GREETING_DURATION_MS,
+      fontFamily: CHATTER_FONT_FAMILY,
+      fontSizePx: CHATTER_FONT_SIZE_PX,
+      lineHeightRatio: CHATTER_LINE_HEIGHT_RATIO,
+      textPaddingTopPx: CHATTER_TEXT_PADDING_TOP_PX,
+      textOffsetYPx: CHATTER_TEXT_OFFSET_Y_PX,
+      bubbleHeightAdjustmentPx: CHATTER_BUBBLE_HEIGHT_ADJUSTMENT_PX,
+      textAlphaThreshold: CHATTER_TEXT_ALPHA_THRESHOLD,
     });
     const timer = this.time.delayedCall(GREETING_DURATION_MS, () => {
       agent.bubble?.destroy();

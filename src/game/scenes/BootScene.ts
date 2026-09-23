@@ -34,7 +34,7 @@ export class BootScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#000000');
     this.fpsText = this.add.text(12, 12, 'FPS 0', {
       color: '#00ff88',
-      fontFamily: '"Galmuri11", monospace',
+      fontFamily: '"FS Pixel Sans", "Galmuri11", monospace',
       fontSize: '11px',
     });
     this.fpsText.setScrollFactor(0);

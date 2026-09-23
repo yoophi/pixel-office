@@ -11,6 +11,7 @@
   - `/demo/agent-collision`: 캐릭터 간 충돌 회피.
   - `/demo/agent-crowd-collision`: 주변 캐릭터가 무작위로 움직일 때 경로 재계산.
   - `/demo/depth-sorting`: 캐릭터-가구, 캐릭터-캐릭터 depth 정렬.
+  - `/demo/pixel-agents-office`: pixel-agents 가구 에셋 + pixtuoid 레이아웃 규칙으로 화면 크기에 맞춰 생성한 오피스. `PhaserGame`을 쓰지 않고 자체 `Phaser.Game`을 만듭니다([`pixel-agents-assets-and-layout.md`](pixel-agents-assets-and-layout.md)).
 - 각 데모 화면은 공통적으로 `PhaserGame`, `TilesetSwitcher`, `DemoNavigation`을 사용합니다.
 - 데모 화면이 언마운트될 때는 데모 에이전트 제거와 `demo:obstacles-set` 초기화를 함께 수행해야 합니다. 그렇지 않으면 다른 데모나 기본 오피스 화면에 임시 장애물이 남을 수 있습니다.
 

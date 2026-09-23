@@ -4,9 +4,22 @@ export interface SpeechBubbleConfig {
   target: Phaser.GameObjects.Sprite;
   message: string;
   durationMs: number;
+  fontFamily?: string;
+  fontSizePx?: number;
+  lineHeightRatio?: number;
+  textPaddingTopPx?: number;
+  textOffsetYPx?: number;
+  bubbleHeightAdjustmentPx?: number;
+  textAlphaThreshold?: number;
 }
 
 export class SpeechBubble {
+  private static readonly defaultFontFamily =
+    '"FS Pixel Sans Matched", "Galmuri11", "Pretendard", "Noto Sans KR", sans-serif';
+  private static readonly defaultFontSizePx = 11;
+  private static readonly defaultLineHeightRatio = 1.2;
+  private static readonly defaultTextPaddingTopPx = 1;
+  private static readonly defaultTextOffsetYPx = -1;
   private static readonly minTextureResolution = 3;
   private static readonly paddingX = 12;
   private static readonly paddingY = 8;
@@ -24,6 +37,8 @@ export class SpeechBubble {
   private readonly bubble: Phaser.GameObjects.Graphics;
   private readonly text: Phaser.GameObjects.Text;
   private readonly target: Phaser.GameObjects.Sprite;
+  private readonly bubbleHeightAdjustmentPx: number;
+  private readonly textAlphaThreshold?: number;
   private expiresAt: number;
   private lastTextureResolution = 0;
   private bubbleHeight = 0;
@@ -31,16 +46,25 @@ export class SpeechBubble {
   constructor(scene: Phaser.Scene, config: SpeechBubbleConfig) {
     this.scene = scene;
     this.target = config.target;
+    this.bubbleHeightAdjustmentPx = config.bubbleHeightAdjustmentPx ?? 0;
+    this.textAlphaThreshold = config.textAlphaThreshold;
     this.expiresAt = scene.time.now + config.durationMs;
+    const fontSizePx = config.fontSizePx ?? SpeechBubble.defaultFontSizePx;
 
     this.text = scene.add.text(0, 0, config.message, {
       color: '#111827',
-      fontFamily: '"Pretendard", "Noto Sans KR", sans-serif',
-      fontSize: '11px',
-      lineSpacing: 2,
+      fontFamily: config.fontFamily ?? SpeechBubble.defaultFontFamily,
+      fontSize: `${fontSizePx}px`,
+      padding: { top: config.textPaddingTopPx ?? SpeechBubble.defaultTextPaddingTopPx },
       wordWrap: { width: SpeechBubble.wordWrapWidth },
     });
+    const lineHeightRatio = config.lineHeightRatio ?? SpeechBubble.defaultLineHeightRatio;
+    const lineSpacingPx =
+      fontSizePx * lineHeightRatio - this.text.getTextMetrics().fontSize - this.text.style.strokeThickness;
+    // Phaser의 lineSpacing은 선언한 CSS 크기가 아니라 측정된 글꼴 높이에 더해집니다.
+    this.text.setLineSpacing(lineSpacingPx);
     this.text.setOrigin(0.5, 0.5);
+    this.text.setY(config.textOffsetYPx ?? SpeechBubble.defaultTextOffsetYPx);
     this.syncTextureResolution();
 
     this.shadow = scene.add.graphics();
@@ -84,7 +108,7 @@ export class SpeechBubble {
   private redrawBubble() {
     const bounds = this.text.getBounds();
     const width = Math.ceil(bounds.width) + SpeechBubble.paddingX * 2;
-    const height = Math.ceil(bounds.height) + SpeechBubble.paddingY * 2;
+    const height = Math.ceil(bounds.height) + SpeechBubble.paddingY * 2 + this.bubbleHeightAdjustmentPx;
     this.bubbleHeight = height;
     const x = -Math.round(width / 2);
     const y = -Math.round(height / 2);
@@ -140,5 +164,17 @@ export class SpeechBubble {
     if (!forceRedraw && target === this.lastTextureResolution) return;
     this.lastTextureResolution = target;
     this.text.setResolution(target);
+    this.applyTextAlphaThreshold();
+  }
+
+  private applyTextAlphaThreshold() {
+    if (this.textAlphaThreshold === undefined) return;
+    const { canvas, context } = this.text;
+    const image = context.getImageData(0, 0, canvas.width, canvas.height);
+    for (let index = 3; index < image.data.length; index += 4) {
+      image.data[index] = image.data[index] >= this.textAlphaThreshold ? 255 : 0;
+    }
+    context.putImageData(image, 0, 0);
+    this.text.frame.source.update();
   }
 }

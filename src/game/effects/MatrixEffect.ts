@@ -62,7 +62,7 @@ function createDigitalRain(scene: Phaser.Scene, target: Phaser.GameObjects.Sprit
         GLYPHS[(column + row) % GLYPHS.length],
         {
           color: row === 0 ? '#d1fae5' : '#22c55e',
-          fontFamily: 'monospace',
+          fontFamily: '"FS Pixel Sans", monospace',
           fontSize: '6px',
         },
       );
