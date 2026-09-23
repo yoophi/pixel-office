@@ -17,6 +17,7 @@ import { playMatrixDespawnEffect, playMatrixSpawnEffect } from '../effects/Matri
 import { createPathfindingSystemFromTilemap, type PathNode } from '../systems/PathfindingSystem.js';
 import { createSeatAssignmentSystemFromTilemap, type SeatAssignmentSystem } from '../systems/SeatAssignmentSystem.js';
 import { SocialSystem } from '../systems/SocialSystem.js';
+import { getTilesetImageKey } from '../tiled/tilesetVariants.js';
 import { createPhaserTilemap } from '../tiled/loader.js';
 import { DEMO_CHAIR_KEY, DEMO_DESK_KEY, SAMPLE_MAP_KEY } from './BootScene.js';
 
@@ -132,7 +133,10 @@ export class OfficeScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.DESTROY, cleanup);
     this.tilesetSwitchStop = gameBus.on('ui:tileset-selected', ({ variantId }) => {
       if (variantId === this.activeVariantId) return;
-      this.scene.restart({ variantId });
+      const textureKey = getTilesetImageKey(variantId);
+      if (!this.textures.exists(textureKey)) return;
+      this.activeVariantId = variantId;
+      map.tilesets.forEach((tileset) => tileset.setImage(this.textures.get(textureKey)));
     });
     this.zoomChangeStop = gameBus.on('ui:zoom-changed', ({ scale }) => {
       applyZoom(scale);
@@ -368,15 +372,8 @@ function setDemoObstacles(
 
   obstacles.forEach((point) => {
     blocked.add(toGridKey(point));
-    const obstacle = scene.add.rectangle(
-      tileCenter(point.x),
-      tileCenter(point.y),
-      TARGET_TILE_SIZE,
-      TARGET_TILE_SIZE,
-      0x73513a,
-      0.92,
-    );
-    obstacle.setStrokeStyle(1, 0xf0c48b, 0.38);
+    const obstacle = scene.add.image(tileCenter(point.x), tileBottom(point.y), 'demo-obstacle-plant');
+    obstacle.setOrigin(0.5, 1);
     obstacle.setDepth(getObjectDepth(point, depth));
     group.add(obstacle);
   });

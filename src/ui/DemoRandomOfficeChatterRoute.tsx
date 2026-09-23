@@ -31,31 +31,31 @@ const CHATTER_TEXT_OFFSET_Y_PX = -2;
 const CHATTER_BUBBLE_HEIGHT_ADJUSTMENT_PX = 1;
 
 const furnitureAssets = [
-  { key: 'random-furniture-table', url: '/assets/furniture/desks/TABLE_WOOD.png' },
-  { key: 'random-furniture-table-lg', url: '/assets/furniture/desks/TABLE_WOOD_LG.png' },
-  { key: 'random-furniture-desk', url: '/assets/furniture/desks/TABLE_WOOD_VERTICAL.png' },
-  { key: 'random-furniture-chair-back', url: '/assets/furniture/chairs/CHAIR_CUSHIONED_BACK.png' },
-  { key: 'random-furniture-chair-front', url: '/assets/furniture/chairs/CHAIR_CUSHIONED_FRONT.png' },
-  { key: 'random-furniture-chair-left', url: '/assets/furniture/chairs/CHAIR_CUSHIONED_LEFT.png' },
-  { key: 'random-furniture-chair-right', url: '/assets/furniture/chairs/CHAIR_CUSHIONED_RIGHT.png' },
-  { key: 'random-furniture-plant-1', url: '/assets/furniture/decor/PLANT_1.png' },
-  { key: 'random-furniture-plant-2', url: '/assets/furniture/decor/PLANT_2.png' },
-  { key: 'random-furniture-bookshelf', url: '/assets/furniture/storage/FULL_BOOKSHELF_TALL.png' },
-  { key: 'random-furniture-cabinet', url: '/assets/furniture/storage/FULL_CABINET_TALL.png' },
-  { key: 'random-furniture-server', url: '/assets/furniture/electronics/SERVER.png' },
-  { key: 'random-furniture-water', url: '/assets/furniture/misc/WATER_COOLER.png' },
+  { key: 'random-furniture-table', url: '/assets/furniture/SMALL_TABLE/SMALL_TABLE_FRONT.png' },
+  { key: 'random-furniture-table-lg', url: '/assets/furniture/DESK/DESK_FRONT.png' },
+  { key: 'random-furniture-desk', url: '/assets/furniture/SMALL_TABLE/SMALL_TABLE_SIDE.png' },
+  { key: 'random-furniture-chair-back', url: '/assets/furniture/CUSHIONED_CHAIR/CUSHIONED_CHAIR_BACK.png' },
+  { key: 'random-furniture-chair-front', url: '/assets/furniture/CUSHIONED_CHAIR/CUSHIONED_CHAIR_FRONT.png' },
+  { key: 'random-furniture-chair-left', url: '/assets/furniture/CUSHIONED_CHAIR/CUSHIONED_CHAIR_SIDE.png' },
+  { key: 'random-furniture-chair-right', url: '/assets/furniture/CUSHIONED_CHAIR/CUSHIONED_CHAIR_SIDE.png' },
+  { key: 'random-furniture-plant-1', url: '/assets/furniture/PLANT/PLANT.png' },
+  { key: 'random-furniture-plant-2', url: '/assets/furniture/PLANT_2/PLANT_2.png' },
+  { key: 'random-furniture-bookshelf', url: '/assets/furniture/DOUBLE_BOOKSHELF/DOUBLE_BOOKSHELF.png' },
+  { key: 'random-furniture-shelf', url: '/assets/furniture/BOOKSHELF/BOOKSHELF.png' },
+  { key: 'random-furniture-cactus', url: '/assets/furniture/CACTUS/CACTUS.png' },
+  { key: 'random-furniture-bin', url: '/assets/furniture/BIN/BIN.png' },
 ] as const;
 
 type FurnitureKey = (typeof furnitureAssets)[number]['key'];
 
-const workstationDeskAssets = ['random-furniture-table', 'random-furniture-table-lg', 'random-furniture-desk'] as const;
+const workstationDeskAssets = ['random-furniture-table', 'random-furniture-table-lg'] as const;
 const supportFurnitureAssets = [
   'random-furniture-plant-1',
   'random-furniture-plant-2',
   'random-furniture-bookshelf',
-  'random-furniture-cabinet',
-  'random-furniture-server',
-  'random-furniture-water',
+  'random-furniture-shelf',
+  'random-furniture-cactus',
+  'random-furniture-bin',
 ] as const;
 
 const chatterTopics = [
@@ -164,7 +164,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
   private readonly reservedTiles = new Map<string, GridPoint>();
   private worldWidth = 0;
   private worldHeight = 0;
-  private floor?: Phaser.GameObjects.Graphics;
+  private floor?: Phaser.GameObjects.TileSprite;
   private furnitureGroup?: Phaser.GameObjects.Group;
 
   constructor() {
@@ -173,6 +173,10 @@ class RandomOfficeChatterScene extends Phaser.Scene {
 
   preload() {
     preloadCharacterAssets(this);
+    this.load.image('random-floor', '/assets/floors/floor_6.png');
+    this.load.spritesheet('random-wall', '/assets/walls/wall_0.png', { frameWidth: 16, frameHeight: 32 });
+    this.load.image('random-pc-side', '/assets/furniture/PC/PC_SIDE.png');
+    this.load.image('random-pc', '/assets/furniture/PC/PC_FRONT_ON_1.png');
     furnitureAssets.forEach((asset) => this.load.image(asset.key, asset.url));
   }
 
@@ -219,32 +223,16 @@ class RandomOfficeChatterScene extends Phaser.Scene {
 
   private drawFloor() {
     this.floor?.destroy();
-    const floor = this.add.graphics();
-    floor.fillStyle(0x152027, 1);
-    floor.fillRect(0, 0, this.worldWidth, this.worldHeight);
-
-    for (let y = 0; y < this.gridHeight; y += 1) {
-      for (let x = 0; x < this.gridWidth; x += 1) {
-        const point = { x, y };
-        const tileX = x * TILE_SIZE;
-        const tileY = y * TILE_SIZE;
-        const isBoundary = x === 0 || y === 0 || x === this.gridWidth - 1 || y === this.gridHeight - 1;
-        const isBlocked = this.blockedTiles.has(toTileKey(point));
-        const isNearFurniture = !isBlocked && this.isNearBlockedTile(point);
-
-        floor.fillStyle(getFloorTileColor(isBoundary, isBlocked, isNearFurniture), 1);
-        floor.fillRect(tileX, tileY, TILE_SIZE, TILE_SIZE);
+    const floor = this.add.tileSprite(0, 0, this.worldWidth, this.worldHeight, 'random-floor');
+    floor.setOrigin(0).setTileScale(PIXEL_VIEW_SCALE).setTint(0xc9b38d).setDepth(-1000);
+    for (let y = 0; y < this.gridHeight; y++) {
+      for (let x = 0; x < this.gridWidth; x++) {
+        if (x !== 0 && y !== 0 && x !== this.gridWidth - 1 && y !== this.gridHeight - 1) continue;
+        const horizontal = y === 0 || y === this.gridHeight - 1;
+        this.add.image(x * TILE_SIZE, (y - 1) * TILE_SIZE, 'random-wall', horizontal ? 10 : 5)
+          .setOrigin(0).setScale(PIXEL_VIEW_SCALE).setTint(0xbbc9b9).setDepth(getDepth(tileBottom(y)));
       }
     }
-
-    floor.lineStyle(1, 0x2b3b45, 0.52);
-    for (let x = 0; x <= this.worldWidth; x += TILE_SIZE) {
-      floor.lineBetween(x, 0, x, this.worldHeight);
-    }
-    for (let y = 0; y <= this.worldHeight; y += TILE_SIZE) {
-      floor.lineBetween(0, y, this.worldWidth, y);
-    }
-    floor.setDepth(-1000);
     this.floor = floor;
   }
 
@@ -285,23 +273,25 @@ class RandomOfficeChatterScene extends Phaser.Scene {
     if (facing === 'south') {
       this.addFurniture(anchor, pickRandom(workstationDeskAssets));
       this.addFurniture({ x: anchor.x, y: anchor.y + 1 }, 'random-furniture-chair-back');
-      this.addFurniture({ x: anchor.x + 1, y: anchor.y }, 'random-furniture-chair-left');
+      this.add.image(tileCenter(anchor.x), tileBottom(anchor.y) - 8 * PIXEL_VIEW_SCALE, 'random-pc')
+        .setOrigin(0.5, 1).setScale(PIXEL_VIEW_SCALE).setDepth(getDepth(tileBottom(anchor.y)) + 0.0001);
       return;
     }
 
     this.addFurniture(anchor, 'random-furniture-desk');
     this.addFurniture({ x: anchor.x - 1, y: anchor.y }, 'random-furniture-chair-right');
+    this.add.image(tileCenter(anchor.x), tileBottom(anchor.y) - 16 * PIXEL_VIEW_SCALE, 'random-pc-side')
+      .setOrigin(0.5, 1).setScale(PIXEL_VIEW_SCALE).setDepth(getDepth(tileBottom(anchor.y)) + 0.0001);
     this.addFurniture({ x: anchor.x, y: anchor.y + 1 }, 'random-furniture-chair-back');
   }
 
   private canPlaceWorkstation(anchor: GridPoint) {
-    return [
-      anchor,
-      { x: anchor.x, y: anchor.y + 1 },
-      { x: anchor.x + 1, y: anchor.y },
-      { x: anchor.x - 1, y: anchor.y },
-      { x: anchor.x + 1, y: anchor.y + 1 },
-    ].every((point) => this.isOpenTile(point));
+    for (let y = anchor.y - 2; y <= anchor.y + 1; y++) {
+      for (let x = anchor.x - 2; x <= anchor.x + 2; x++) {
+        if (!this.isOpenTile({ x, y })) return false;
+      }
+    }
+    return true;
   }
 
   private placeSupportFurniture() {
@@ -329,11 +319,20 @@ class RandomOfficeChatterScene extends Phaser.Scene {
   }
 
   private addFurniture(tile: GridPoint, key: FurnitureKey) {
-    const sprite = this.add.image(tileCenter(tile.x), tileBottom(tile.y), key);
-    sprite.setOrigin(0.5, 1);
+    const frame = this.textures.get(key).get();
+    const width = Math.ceil(frame.width / 16);
+    const height = Math.ceil(frame.height / 16);
+    const left = tile.x - Math.floor(width / 2);
+    for (let y = tile.y - height + 1; y <= tile.y; y++) {
+      for (let x = left; x < left + width; x++) {
+        if (!this.isOpenTile({ x, y })) return;
+      }
+    }
+    const sprite = this.add.image(left * TILE_SIZE, tileBottom(tile.y), key);
+    sprite.setOrigin(0, 1);
     sprite.setScale(PIXEL_VIEW_SCALE);
-    sprite.setDepth(getDepth(sprite.y) - 0.02);
-    sprite.setAlpha(0.96);
+    sprite.setFlipX(key === 'random-furniture-chair-left');
+    sprite.setDepth(getDepth(sprite.y) - 0.0001);
     this.furnitureGroup?.add(sprite);
     this.blockFurnitureFootprint(tile, sprite);
   }
@@ -550,15 +549,6 @@ class RandomOfficeChatterScene extends Phaser.Scene {
     return this.isInsideGrid(point) && !this.blockedTiles.has(toTileKey(point));
   }
 
-  private isNearBlockedTile(point: GridPoint) {
-    return [
-      { x: point.x, y: point.y - 1 },
-      { x: point.x + 1, y: point.y },
-      { x: point.x, y: point.y + 1 },
-      { x: point.x - 1, y: point.y },
-    ].some((candidate) => this.blockedTiles.has(toTileKey(candidate)));
-  }
-
   private isAvailableForAgent(agent: DemoAgent, point: GridPoint) {
     if (!this.isOpenTile(point)) return false;
     return !isOccupiedByOtherAgent(this.agentTiles, this.reservedTiles, agent.character.id, point);
@@ -579,13 +569,6 @@ class RandomOfficeChatterScene extends Phaser.Scene {
 
 function getDepth(y: number) {
   return y / 10000;
-}
-
-function getFloorTileColor(isBoundary: boolean, isBlocked: boolean, isNearFurniture: boolean) {
-  if (isBoundary) return 0x11191f;
-  if (isBlocked) return 0x172128;
-  if (isNearFurniture) return 0x22343d;
-  return 0x1c2a32;
 }
 
 function manhattan(a: GridPoint, b: GridPoint) {

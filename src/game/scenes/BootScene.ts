@@ -26,8 +26,9 @@ export class BootScene extends Phaser.Scene {
       mapUrl: SAMPLE_MAP_URL,
     });
     preloadCharacterAssets(this);
-    this.load.image(DEMO_CHAIR_KEY, '/assets/furniture/chairs/CHAIR_CUSHIONED_RIGHT.png');
-    this.load.image(DEMO_DESK_KEY, '/assets/furniture/desks/TABLE_WOOD_VERTICAL.png');
+    this.load.image(DEMO_CHAIR_KEY, '/assets/furniture/CUSHIONED_CHAIR/CUSHIONED_CHAIR_SIDE.png');
+    this.load.image('demo-obstacle-plant', '/assets/furniture/PLANT/PLANT.png');
+    this.load.image(DEMO_DESK_KEY, '/assets/furniture/SMALL_TABLE/SMALL_TABLE_SIDE.png');
   }
 
   create() {

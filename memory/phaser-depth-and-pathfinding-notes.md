@@ -7,7 +7,7 @@
 - 캐릭터 sprite는 발 위치가 기준점이 되도록 bottom origin을 사용합니다.
 - 캐릭터 depth는 tile layer base에 `sprite.y / 10000`을 더해 아래쪽 캐릭터가 위에 그려지도록 합니다.
 - 데모용 가구와 장애물도 캐릭터와 같은 layer base를 사용해야 합니다. 가구 base를 낮게 잡으면 y-depth가 있어도 캐릭터가 항상 가구 위에 그려집니다.
-- `TABLE_WOOD_VERTICAL.png`는 `16x32`라서 시각적으로 세로 2개 타일을 차지합니다.
+- 공통 데모 책상은 `SMALL_TABLE/SMALL_TABLE_SIDE.png`(16×48)를 사용합니다. 위쪽 1행은 배경 영역이므로 바닥 footprint는 아래쪽 2개 타일입니다. 의자는 `CUSHIONED_CHAIR_SIDE.png`(16×16)입니다.
 - 세로 책상은 anchor tile 하나만 막으면 부족합니다. anchor `{x, y}`와 위쪽 `{x, y - 1}`을 모두 footprint로 보고 blocking/depth/minimap 검증에 반영해야 합니다.
 - 캐릭터가 책상 위로 걷는 것처럼 보이면 먼저 z-index가 아니라 가구 footprint와 blocked tile 계산을 확인합니다.
 

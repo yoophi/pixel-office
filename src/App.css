@@ -360,21 +360,11 @@
 .speech-font-card__stage--dom::before {
   position: absolute;
   left: 50%;
-  bottom: 42px;
-  width: 36px;
-  height: 36px;
-  background: #29363d;
-  content: "";
-  transform: translateX(-50%);
-}
-
-.speech-font-card__stage--dom::after {
-  position: absolute;
-  left: 50%;
-  bottom: 64px;
-  width: 20px;
-  height: 28px;
-  background: #74a7ff;
+  bottom: 12px;
+  width: 32px;
+  height: 64px;
+  background: url('/assets/characters/char_0.png') -32px 0 / 224px 192px no-repeat;
+  image-rendering: pixelated;
   content: "";
   transform: translateX(-50%);
 }

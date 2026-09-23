@@ -12,16 +12,15 @@ export function DemoSpeechBubbleFontRoute() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    drawCanvasBubble(largerFontCanvasRef.current, {
-      label: '1',
-      fontSize: 16,
-      resolution: 1,
-    });
-    drawCanvasBubble(highResolutionCanvasRef.current, {
-      label: '2',
-      fontSize: 11,
-      resolution: 3,
-    });
+    let cancelled = false;
+    const character = new Image();
+    character.onload = () => {
+      if (cancelled) return;
+      drawCanvasBubble(largerFontCanvasRef.current, { label: '1', fontSize: 16, resolution: 1 }, character);
+      drawCanvasBubble(highResolutionCanvasRef.current, { label: '2', fontSize: 11, resolution: 3 }, character);
+    };
+    character.src = '/assets/characters/char_0.png';
+    return () => { cancelled = true; character.onload = null; };
   }, []);
 
   return (
@@ -73,7 +72,7 @@ interface DrawCanvasBubbleOptions {
   resolution: number;
 }
 
-function drawCanvasBubble(canvas: HTMLCanvasElement | null, options: DrawCanvasBubbleOptions) {
+function drawCanvasBubble(canvas: HTMLCanvasElement | null, options: DrawCanvasBubbleOptions, character: HTMLImageElement) {
   if (!canvas) return;
 
   const cssWidth = 300;
@@ -91,10 +90,8 @@ function drawCanvasBubble(canvas: HTMLCanvasElement | null, options: DrawCanvasB
   context.clearRect(0, 0, cssWidth, cssHeight);
   context.fillStyle = '#121a20';
   context.fillRect(0, 0, cssWidth, cssHeight);
-  context.fillStyle = '#29363d';
-  context.fillRect(132, 116, 36, 36);
-  context.fillStyle = '#74a7ff';
-  context.fillRect(140, 102, 20, 28);
+  context.imageSmoothingEnabled = false;
+  context.drawImage(character, 16, 0, 16, 32, 134, 100, 32, 64);
   context.fillStyle = '#ffffff';
   context.strokeStyle = '#111827';
   context.lineWidth = 1;

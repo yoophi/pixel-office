@@ -5,8 +5,8 @@
 ## 파일 위치
 
 - 기본 샘플 맵: `public/maps/sample.tmj`
-- 타일셋 변형 이미지: `public/tilesets/office-warm.png`, `public/tilesets/office-dark.png`
-- `.tmj`는 기본으로 `office-warm.png`를 참조합니다. 런타임 테마 변경은 같은 타일 순서의 이미지로 교체합니다.
+- 타일셋 변형 이미지: `public/assets/generated/pixel-office-warm.png`, `public/assets/generated/pixel-office-dark.png`
+- `.tmj`는 기본으로 `pixel-office-warm.png`를 참조합니다. 런타임 테마 변경은 같은 타일 순서의 이미지로 교체합니다.
 
 ## 맵 기준
 
@@ -32,8 +32,8 @@
 |---|---|---|
 | `0` | floor | `walkable=true` |
 | `1` | wall | `walkable=false` |
-| `2` | desk | `walkable=false` |
-| `3` | chair | `walkable=false` |
+| `2`~`5` | 커피 테이블의 좌상·우상·좌하·우하 조각 | `walkable=false` |
+| `6`~`9` | 책장의 좌상·우상·좌하·우하 조각 | `walkable=false` |
 
 Tiled의 layer data에서는 gid가 1부터 시작하므로, `tile id 0`은 gid `1`입니다.
 
@@ -50,4 +50,6 @@ Tiled의 layer data에서는 gid가 1부터 시작하므로, `tile id 0`은 gid 
 
 ## 변형 타일셋 추가 규칙
 
-새 변형을 추가할 때는 `public/tilesets/office-<variant>.png` 형식을 사용합니다. 모든 변형은 `64 x 16`, 4 columns, 16px tile을 유지해야 하며 tile id 의미를 바꾸면 안 됩니다.
+새 변형은 `public/assets/generated/pixel-office-<variant>.png` 형식을 사용합니다. 모든 변형은 `160 x 16`, 10 columns, 16px tile을 유지해야 하며 tile id 의미를 바꾸면 안 됩니다.
+
+2026-09-23부터 `scripts/build-demo-tilesets.py`가 Pixel Agents 원본 바닥·벽·가구를 잘라 아틀라스를 생성합니다. 재생성은 `uv run --with pillow python scripts/build-demo-tilesets.py`로 실행합니다. 원본 PNG는 수정하지 않습니다. 각 타일 레이어는 20×11=220개 값을 가지며, 기존 벽·가구의 충돌 영역은 유지합니다.

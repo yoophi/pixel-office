@@ -77,12 +77,9 @@
 - 브라우저 크기를 변경해도 가구와 캐릭터 배치는 다시 하지 않습니다.
 - resize 시에는 Phaser canvas viewport만 변경하고, 기존 world가 crop되어 보이게 합니다.
 - 바닥 타일은 가구 배치 이후 그립니다.
-- 바닥 색은 가구 배치 정보를 참고해 구분합니다.
-  - boundary tile
-  - blocked tile
-  - furniture 근처 walkable tile
-  - 일반 walkable path tile
-- 랜덤 가구는 `public/assets/furniture/**`의 기존 PNG를 사용합니다.
+- 바닥은 Pixel Agents `floors/floor_6.png`, 경계 벽은 `walls/wall_0.png`를 사용합니다. 과거의 디버그용 단색 타일 구분은 사용하지 않습니다.
+- 랜덤 가구는 `public/assets/furniture/`의 대문자 디렉터리에 있는 Pixel Agents 에셋을 사용합니다. PC는 책상 위 장식으로 올립니다.
+- 가구는 실제 이미지 크기로 전체 배치 영역을 검사하고, sprite와 footprint의 좌측 좌표를 타일 격자에 일치시킵니다. 의자 좌우 방향은 side 이미지 반전으로 처리합니다.
 - 캐릭터는 `public/assets/characters/char_*.png` spritesheet를 사용합니다.
 
 ## 관련 파일
