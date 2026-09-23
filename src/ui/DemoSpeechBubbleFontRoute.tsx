@@ -90,6 +90,10 @@ function drawCanvasBubble(canvas: HTMLCanvasElement | null, options: DrawCanvasB
   context.clearRect(0, 0, cssWidth, cssHeight);
   context.fillStyle = '#121a20';
   context.fillRect(0, 0, cssWidth, cssHeight);
+  context.fillStyle = 'rgba(21, 32, 39, 0.28)';
+  context.fillRect(142, 158, 16, 2);
+  context.fillRect(138, 160, 24, 4);
+  context.fillRect(142, 164, 16, 2);
   context.imageSmoothingEnabled = false;
   context.drawImage(character, 16, 0, 16, 32, 134, 100, 32, 64);
   context.fillStyle = '#ffffff';

@@ -33,6 +33,7 @@ export class Character {
   direction: Direction;
   status: CharacterAnimationStatus;
   private destroyed = false;
+  private readonly shadow: Phaser.GameObjects.Graphics;
 
   constructor(scene: Phaser.Scene, config: CharacterConfig) {
     this.id = config.id;
@@ -42,6 +43,18 @@ export class Character {
 
     this.sprite = scene.add.sprite(config.x, config.y, config.textureKey);
     this.sprite.setOrigin(0.5, 1);
+    this.shadow = scene.add.graphics();
+    this.shadow.fillStyle(0x152027, 0.28);
+    this.shadow.fillRect(-4, -3, 8, 1);
+    this.shadow.fillRect(-6, -2, 12, 2);
+    this.shadow.fillRect(-4, 0, 8, 1);
+    this.syncShadow();
+    // 씬의 tween과 직접 sprite 변경까지 반영한 뒤 렌더링한다.
+    scene.events.on(Phaser.Scenes.Events.POST_UPDATE, this.syncShadow, this);
+    this.sprite.once(Phaser.GameObjects.Events.DESTROY, () => {
+      scene.events.off(Phaser.Scenes.Events.POST_UPDATE, this.syncShadow, this);
+      this.shadow.destroy();
+    });
     this.setDirection(this.direction);
     this.setStatus(this.status);
   }
@@ -73,6 +86,15 @@ export class Character {
     if (this.destroyed) return;
     this.destroyed = true;
     this.sprite.destroy();
+  }
+
+  private syncShadow() {
+    if (this.destroyed || !this.sprite.active) return;
+    this.shadow.setPosition(this.sprite.x, this.sprite.y);
+    this.shadow.setScale(this.sprite.scaleX, this.sprite.scaleY);
+    this.shadow.setDepth(this.sprite.depth - 0.00001);
+    this.shadow.setAlpha(this.sprite.alpha);
+    this.shadow.setVisible(this.sprite.visible);
   }
 
   private playCurrentAnimation() {

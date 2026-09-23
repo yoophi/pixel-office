@@ -360,7 +360,20 @@
     rgba(7, 12, 16, 0.88);
 }
 
+.speech-font-card__stage--dom::after {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 24px;
+  height: 8px;
+  background: rgba(21, 32, 39, 0.28);
+  clip-path: polygon(17% 0, 83% 0, 83% 25%, 100% 25%, 100% 75%, 83% 75%, 83% 100%, 17% 100%, 17% 75%, 0 75%, 0 25%, 17% 25%);
+  content: "";
+  transform: translateX(-50%);
+}
+
 .speech-font-card__stage--dom::before {
+  z-index: 1;
   position: absolute;
   left: 50%;
   bottom: 12px;

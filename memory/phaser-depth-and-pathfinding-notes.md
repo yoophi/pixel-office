@@ -11,6 +11,12 @@
 - 세로 책상은 anchor tile 하나만 막으면 부족합니다. anchor `{x, y}`와 위쪽 `{x, y - 1}`을 모두 footprint로 보고 blocking/depth/minimap 검증에 반영해야 합니다.
 - 캐릭터가 책상 위로 걷는 것처럼 보이면 먼저 z-index가 아니라 가구 footprint와 blocked tile 계산을 확인합니다.
 
+## 캐릭터 그림자
+
+- 로컬 에셋과 이관 원본 87개 파일에 별도 캐릭터 그림자 에셋이 없어 `Character`에서 12×4px 반투명 픽셀 그림자를 그립니다.
+- 발 위치를 따라가며 sprite보다 낮은 depth에 표시합니다. `POST_UPDATE`에서 위치·배율·투명도·표시 여부를 동기화하므로 직접 sprite를 조작하는 tween과 등장/퇴장 효과에도 적용됩니다.
+- sprite 파괴 시 그림자와 이벤트 구독을 함께 정리합니다. 폰트 비교의 Canvas와 DOM 캐릭터에도 같은 형태를 표시합니다.
+
 ## 동적 pathfinding
 
 - 캐릭터 점유 판정은 순수 함수 `src/domain/agentOccupancy.ts`의 `isOccupiedByOtherAgent`를 공유합니다. `OfficeScene`, 랜덤 오피스 전용 씬, 픽셀 오피스 전용 씬 모두 현재 타일과 다음 타일을 같은 규칙으로 검사합니다.
