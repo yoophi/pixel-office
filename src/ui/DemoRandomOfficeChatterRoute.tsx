@@ -23,12 +23,12 @@ const STREAM_RESTART_MAX_MS = 5200;
 const GREETING_CHANCE_PERCENT = 32;
 const GREETING_DURATION_MS = 1800;
 const GREETING_COOLDOWN_MS = 5200;
-const CHATTER_FONT_FAMILY = '"FS Pixel Sans Matched", "Galmuri11", "Pretendard", "Noto Sans KR", sans-serif';
-const CHATTER_FONT_SIZE_PX = 13;
-const CHATTER_LINE_HEIGHT_RATIO = 1.2;
+const CHATTER_FONT_FAMILY = '"Galmuri11", monospace';
+const CHATTER_FONT_SIZE_PX = 12;
+const CHATTER_LINE_HEIGHT_RATIO = 1.5;
 const CHATTER_TEXT_PADDING_TOP_PX = 1;
-const CHATTER_TEXT_OFFSET_Y_PX = -2;
-const CHATTER_BUBBLE_HEIGHT_ADJUSTMENT_PX = 1;
+const CHATTER_TEXT_OFFSET_Y_PX = 0;
+const CHATTER_BUBBLE_HEIGHT_ADJUSTMENT_PX = 0;
 
 const furnitureAssets = [
   { key: 'random-furniture-table', url: '/assets/furniture/SMALL_TABLE/SMALL_TABLE_FRONT.png' },
@@ -184,6 +184,8 @@ class RandomOfficeChatterScene extends Phaser.Scene {
     this.worldWidth = this.scale.width;
     this.worldHeight = this.scale.height;
     this.cameras.main.setBackgroundColor('#121a20');
+    this.cameras.main.setZoom(1);
+    this.cameras.main.roundPixels = true;
     this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight, true);
     this.placeFurniture();
     this.drawFloor();
@@ -399,6 +401,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
       target: agent.character.sprite,
       message: lines[0],
       durationMs: streamDuration,
+      pixelPerfect: true,
       fontFamily: CHATTER_FONT_FAMILY,
       fontSizePx: CHATTER_FONT_SIZE_PX,
       lineHeightRatio: CHATTER_LINE_HEIGHT_RATIO,
@@ -490,6 +493,7 @@ class RandomOfficeChatterScene extends Phaser.Scene {
       target: agent.character.sprite,
       message: pickRandom(greetings),
       durationMs: GREETING_DURATION_MS,
+      pixelPerfect: true,
       fontFamily: CHATTER_FONT_FAMILY,
       fontSizePx: CHATTER_FONT_SIZE_PX,
       lineHeightRatio: CHATTER_LINE_HEIGHT_RATIO,

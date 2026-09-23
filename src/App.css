@@ -267,8 +267,9 @@
 .demo-nav p {
   margin: 0 0 8px;
   color: #f6d77b;
-  font-family: "FS Pixel Sans", "Galmuri11", monospace;
-  font-size: 11px;
+  font-family: "Galmuri11", monospace;
+  font-size: 12px;
+  line-height: 18px;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -287,7 +288,9 @@
   color: #dfeae2;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: "Galmuri11", monospace;
   font-size: 12px;
+  line-height: 18px;
   text-decoration: none;
 }
 
@@ -415,18 +418,8 @@
 
 .random-office-host canvas {
   display: block;
-  width: 100vw;
-  height: 100vh;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-}
-
-.random-office-demo .demo-nav p {
-  font-size: 13px;
-}
-
-.random-office-demo .demo-nav a {
-  font-size: 14px;
 }
 
 .demo-actions button {

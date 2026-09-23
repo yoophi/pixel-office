@@ -10,6 +10,7 @@ export interface SpeechBubbleConfig {
   textPaddingTopPx?: number;
   textOffsetYPx?: number;
   bubbleHeightAdjustmentPx?: number;
+  pixelPerfect?: boolean;
 }
 
 export class SpeechBubble {
@@ -37,6 +38,8 @@ export class SpeechBubble {
   private readonly text: Phaser.GameObjects.Text;
   private readonly target: Phaser.GameObjects.Sprite;
   private readonly bubbleHeightAdjustmentPx: number;
+  private readonly pixelPerfect: boolean;
+  private readonly textOffsetY: number;
   private expiresAt: number;
   private lastTextureResolution = 0;
   private bubbleHeight = 0;
@@ -44,6 +47,8 @@ export class SpeechBubble {
   constructor(scene: Phaser.Scene, config: SpeechBubbleConfig) {
     this.scene = scene;
     this.target = config.target;
+    this.pixelPerfect = config.pixelPerfect ?? false;
+    this.textOffsetY = config.textOffsetYPx ?? SpeechBubble.defaultTextOffsetYPx;
     this.bubbleHeightAdjustmentPx = config.bubbleHeightAdjustmentPx ?? 0;
     this.expiresAt = scene.time.now + config.durationMs;
     const fontSizePx = config.fontSizePx ?? SpeechBubble.defaultFontSizePx;
@@ -60,8 +65,8 @@ export class SpeechBubble {
       fontSizePx * lineHeightRatio - this.text.getTextMetrics().fontSize - this.text.style.strokeThickness;
     // Phaser의 lineSpacing은 선언한 CSS 크기가 아니라 측정된 글꼴 높이에 더해집니다.
     this.text.setLineSpacing(lineSpacingPx);
-    this.text.setOrigin(0.5, 0.5);
-    this.text.setY(config.textOffsetYPx ?? SpeechBubble.defaultTextOffsetYPx);
+    this.text.setOrigin(this.pixelPerfect ? 0 : 0.5);
+    this.text.setY(this.textOffsetY);
     this.syncTextureResolution();
 
     this.shadow = scene.add.graphics();
@@ -103,6 +108,10 @@ export class SpeechBubble {
   }
 
   private redrawBubble() {
+    if (this.pixelPerfect) {
+      // 홀수 크기의 텍스처도 반 픽셀 원점에 놓이지 않도록 좌상단을 정수로 고정한다.
+      this.text.setPosition(-Math.floor(this.text.width / 2), -Math.floor(this.text.height / 2) + this.textOffsetY);
+    }
     const bounds = this.text.getBounds();
     const width = Math.ceil(bounds.width) + SpeechBubble.paddingX * 2;
     const height = Math.ceil(bounds.height) + SpeechBubble.paddingY * 2 + this.bubbleHeightAdjustmentPx;
@@ -157,7 +166,9 @@ export class SpeechBubble {
   private syncTextureResolution(forceRedraw = false) {
     const deviceScale = window.devicePixelRatio || 1;
     const cameraZoom = this.scene.cameras.main?.zoom ?? 1;
-    const target = Math.max(SpeechBubble.minTextureResolution, Math.ceil(cameraZoom * deviceScale));
+    const target = this.pixelPerfect
+      ? 1
+      : Math.max(SpeechBubble.minTextureResolution, Math.ceil(cameraZoom * deviceScale));
     if (!forceRedraw && target === this.lastTextureResolution) return;
     this.lastTextureResolution = target;
     this.text.setResolution(target);
