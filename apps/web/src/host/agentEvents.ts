@@ -11,9 +11,9 @@ export function isAgentEvent(value: unknown): value is AgentEvent {
   if (!object(value)) return false;
   if (value.type === 'agent:upsert') {
     const a = value.agent;
-    return object(a) && text(a.id) && typeof a.name === 'string' && statuses.has(String(a.status)) && time(a.updatedAt)
+    return object(a) && text(a.id) && typeof a.name === 'string' && typeof a.status === 'string' && statuses.has(a.status) && time(a.updatedAt)
       && (a.position === undefined || point(a.position)) && (a.destination === undefined || point(a.destination))
-      && (a.direction === undefined || directions.has(String(a.direction)))
+      && (a.direction === undefined || (typeof a.direction === 'string' && directions.has(a.direction)))
       && (a.seatId === undefined || typeof a.seatId === 'string')
       && (a.message === undefined || typeof a.message === 'string')
       && (a.color === undefined || typeof a.color === 'string');
@@ -22,8 +22,8 @@ export function isAgentEvent(value: unknown): value is AgentEvent {
   if (value.type === 'agent:remove') return true;
   if (!time(value.updatedAt)) return false;
   switch (value.type) {
-    case 'agent:status': return statuses.has(String(value.status));
-    case 'agent:move': return point(value.destination) && (value.direction === undefined || directions.has(String(value.direction)));
+    case 'agent:status': return typeof value.status === 'string' && statuses.has(value.status);
+    case 'agent:move': return point(value.destination) && (value.direction === undefined || (typeof value.direction === 'string' && directions.has(value.direction)));
     case 'agent:seat': return value.seatId === null || typeof value.seatId === 'string';
     case 'agent:say': return typeof value.message === 'string' && time(value.durationMs) && value.durationMs >= 0;
     default: return false;

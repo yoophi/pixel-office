@@ -33,7 +33,7 @@ test('events received before scene ready are delivered once and in order', () =>
 test('invalid external events are rejected without modifying the scene or list', () => {
   const inbox = new AgentEventInbox(() => { throw new Error('invalid delivery'); });
   inbox.markReady();
-  for (const event of [null, {}, { type: 'agent:upsert', agent: { ...agent, status: 'broken' } },
+  for (const event of [null, {}, { type: 'agent:upsert', agent: { ...agent, status: Object.create(null) } }, { type: 'agent:upsert', agent: { ...agent, status: 'broken' } },
     { type: 'agent:move', agentId: agent.id, destination: { x: Infinity, y: 0 }, updatedAt: 2 },
     { type: 'agent:say', agentId: agent.id, message: 'hello', durationMs: -1, updatedAt: 2 }]) {
     assert.equal(inbox.accept(event), false);
