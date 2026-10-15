@@ -7,18 +7,19 @@
 **pixel-office** — React + TypeScript + Vite 기반 브라우저 앱으로, **코딩 에이전트(Claude Code 등)의 상태를 픽셀 캐릭터로 시각화**합니다. 오피스·가구·경로 탐색·좌석·사회적 버블은 모두 에이전트 상태를 표현하는 도구이며, 게임이 아니라 **관찰(observability) 도구**입니다.
 
 ### 기술 스택
-- React 19, TypeScript, Vite
-- Canvas 2D 렌더링 (`src/office/engine/renderer.ts`) — v2에서 Phaser 4로 교체 예정
-- 자체 엔진: A* 경로 탐색, z-depth 정렬, HSL colorize 파이프라인, 가구 카탈로그, 좌석 배정, 사회적 대화 버블
-- VS Code 사이드 패널 등 호스트 환경에 임베드
+- pnpm 9.15.5 workspace (`apps/*`, `packages/*`)
+- React 19, TypeScript, Vite, Phaser 4
+- 웹 앱 패키지: `@pixel-office/web`
 
-### 디렉토리 개요 (현재, v2 재작성 중)
-- `src/office/engine/` — 게임 루프, 상태, 렌더러, 캐릭터, matrix 효과
-- `src/office/layout/` — 타일 맵, 가구 카탈로그, 레이아웃 직렬화
-- `src/office/sprites/` — 스프라이트 데이터와 캐시
-- `src/office/editor/` — 자체 에디터 (Tiled 전환 후 제거 예정)
-- `src/hooks/` — React 훅(에셋, 키보드, 로컬 액션)
-- `public/assets/` — 기본 레이아웃, 벽, 캐릭터, 가구 PNG
+### 디렉토리 개요
+- `apps/web/src/` — 앱·도메인·브릿지·Phaser·UI
+- `apps/web/public/` — 이미지·폰트·Tiled 맵
+- `apps/web/tests/` — 충돌 회귀 검사
+- `apps/web/scripts/` — 에셋 생성 스크립트
+- `memory/`, `docs/` — 프로젝트 문서
+- `packages/*` — 향후 공용 패키지 위치(현재 없음)
+
+루트에서 `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm typecheck`를 실행합니다. 과거 문서의 앱 상대 경로는 현재 `apps/web/` 아래에서 찾습니다.
 
 v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.md) 참고.
 
@@ -26,6 +27,7 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 
 중대한 작업을 시작하기 전에 항상 `memory/` 아래 문서를 먼저 확인하고, 사실이 바뀌면 함께 갱신합니다.
 
+- [`memory/pnpm-monorepo.md`](memory/pnpm-monorepo.md) — pnpm workspace 구조·실행·의존성 관리 규칙.
 - [`memory/project-goal.md`](memory/project-goal.md) — 프로젝트의 불변 목표와 모든 설계 결정에 미치는 함의.
 - [`memory/project-constraints.md`](memory/project-constraints.md) — 규모(~100 에이전트), 배포 타깃, 맵 저작 모델, 마이그레이션 방침.
 - [`memory/engine-research.md`](memory/engine-research.md) — Phaser / PixiJS / Excalibur 등 2D 엔진 평가와 현재 추천 순위.
@@ -70,4 +72,4 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 
 ## 테스트 현실
 
-충돌 이동의 최소 회귀 검사는 `node --test tests/agent-collision.test.mjs`로 실행합니다. Phaser tween·타이머를 대체한 controller 검사이므로 실제 렌더링 검증은 포함하지 않습니다. 시각적 검증은 `npm run dev`로 브라우저에서 실행해 변경 사항을 사용해봅니다. 시각적으로 확인 불가능한 변경이라면 "성공"이라고 주장하지 말고 그 사실을 명시합니다.
+충돌 이동의 최소 회귀 검사는 `pnpm test`로 실행합니다. Phaser tween·타이머를 대체한 controller 검사이므로 실제 렌더링 검증은 포함하지 않습니다. 시각적 검증은 `pnpm dev`로 브라우저에서 실행해 변경 사항을 사용해봅니다. 시각적으로 확인 불가능한 변경이라면 "성공"이라고 주장하지 말고 그 사실을 명시합니다.
