@@ -1,5 +1,7 @@
 # 프로젝트 아키텍처 (제안)
 
+> 2026-10-15: 앱 루트는 `apps/web`으로 이동했다. 아래 앱 내부 구조의 경로는 `apps/web` 기준이며 workspace 구성은 [pnpm-monorepo.md](pnpm-monorepo.md)를 따른다.
+
 > 2026-04-21 작성. v2 재작성의 구조적 뼈대입니다. React 셸이 Phaser 게임을 호스팅하는 본 프로젝트의 특성에 맞춰 **"Host ↔ Bridge ↔ Game" 3레이어 + Pure Domain 허브** 구조를 채택합니다.
 
 ## 왜 FSD / Clean / Hexagonal 이 아닌가

@@ -7,11 +7,11 @@
 - 데모 화면은 `HashRouter` 기반의 `/demo/*` 라우트로 제공합니다.
 - 라우트 목록과 네비게이션 메타데이터는 `src/ui/demoRoutes.ts`에서 관리합니다.
 - 현재 데모 라우트는 다음 흐름을 검증합니다.
+  - `/demo/pixel-agents-office`: 새 Pixel Agents 에셋을 사용하는 업무 공간·회의실·라운지. 전용 씬과 공통 줌 툴바를 사용합니다.
   - `/demo/obstacle-walking`: 장애물 회피와 의자/책상 목표 배치.
   - `/demo/agent-collision`: 캐릭터 간 충돌 회피.
   - `/demo/agent-crowd-collision`: 주변 캐릭터가 무작위로 움직일 때 경로 재계산.
   - `/demo/depth-sorting`: 캐릭터-가구, 캐릭터-캐릭터 depth 정렬.
-  - `/demo/pixel-agents-office`: pixel-agents 가구 에셋 + pixtuoid 레이아웃 규칙으로 화면 크기에 맞춰 생성한 오피스. `PhaserGame`을 쓰지 않고 자체 `Phaser.Game`을 만듭니다([`pixel-agents-assets-and-layout.md`](pixel-agents-assets-and-layout.md)).
 - 각 데모 화면은 공통적으로 `PhaserGame`, `TilesetSwitcher`, `DemoNavigation`을 사용합니다.
 - 데모 화면이 언마운트될 때는 데모 에이전트 제거와 `demo:obstacles-set` 초기화를 함께 수행해야 합니다. 그렇지 않으면 다른 데모나 기본 오피스 화면에 임시 장애물이 남을 수 있습니다.
 
@@ -38,3 +38,5 @@
 - 캔버스 크기 변경은 Phaser game config 재생성이 아니라 scale resize로 처리합니다.
 - 툴바가 라우트별 UI와 겹치지 않도록 floating panel 위치를 확인해야 합니다.
 - 새 데모를 추가할 때는 route 링크, cleanup, 공통 navigation, 공통 canvas toolbar 동작을 함께 확인합니다.
+
+- `/demo/interior-assets`: Interior 원본 시트 등록·가구 배치 샘플. 공통 정수 줌 도구 및 원본 에셋 목록을 제공한다.

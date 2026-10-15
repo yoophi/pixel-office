@@ -1,5 +1,7 @@
 # pixel-agents 가구 에셋과 pixtuoid 레이아웃 규칙
 
+> 2026-10-15 병합 참고: 아래는 PR #40의 생성형 데모 기록입니다. 현재 `/demo/pixel-agents-office`는 `src/game/scenes/PixelAgentsOfficeScene.ts`의 고정 레이아웃을 사용하며, 최신 배치 규칙은 `memory/pixel-agents-assets.md`를 따릅니다. 원본 생성기와 에셋은 보존했습니다.
+
 > 2026-09-23 작성. `/demo/pixel-agents-office` 데모의 에셋 출처, manifest 해석 규칙, 배치·이동 제약, 레이아웃 생성 규칙을 정리합니다.
 
 ## 에셋 출처와 형식
