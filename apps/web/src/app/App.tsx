@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from 'react';
-import { PhaserGame } from '@pixel-office/engine/react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+import { AgentOffice } from '@pixel-office/engine/agent-office';
 import type { AgentEventInbox } from '../host/agentEvents.js';
 import './app.css';
 
@@ -7,12 +7,14 @@ const statusLabels = { idle: '대기', walking: '이동', typing: '작업 중', 
 
 export function App({ inbox }: { inbox: AgentEventInbox }) {
   const agents = useSyncExternalStore(inbox.subscribe, inbox.getSnapshot);
+  const [hasConnected, setHasConnected] = useState(false);
+  useEffect(() => { if (agents.length) setHasConnected(true); }, [agents.length]);
   return (
     <main className="app-shell" aria-label="에이전트 오피스">
-      <PhaserGame />
+      <AgentOffice />
       <aside className="agent-status-panel" aria-label="에이전트 상태">
         <h1>에이전트 오피스</h1>
-        <p aria-live="polite">{agents.length ? `연결된 에이전트 ${agents.length}명` : '에이전트 연결을 기다리고 있습니다.'}</p>
+        <p aria-live="polite">{agents.length ? `연결된 에이전트 ${agents.length}명` : hasConnected ? '연결된 에이전트가 없습니다.' : '실제 에이전트 연결 대기 · 샘플 캐릭터 미리보기'}</p>
         <ul>{agents.map((agent) => <li key={agent.id}><strong>{agent.name || agent.id}</strong><span>{statusLabels[agent.status]}</span>{agent.message && <small>{agent.message}</small>}</li>)}</ul>
       </aside>
     </main>

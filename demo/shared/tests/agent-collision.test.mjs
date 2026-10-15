@@ -18,7 +18,7 @@ const sceneImports = (name) => name.includes('agentOccupancy') ? occupancy
   : name === 'phaser' ? { Scene: class {}, Math: { Between: (min) => min } } : {};
 const { RandomOfficeChatterScene } = loadTypeScript('../src/ui/DemoRandomOfficeChatterRoute.tsx', sceneImports,
   '\nexport { RandomOfficeChatterScene };');
-const { PixelAgentsOfficeScene } = loadTypeScript('../src/game/scenes/PixelAgentsOfficeScene.ts', sceneImports);
+const { PixelAgentsOfficeScene } = loadTypeScript('../../../packages/office-engine/src/game/scenes/PixelAgentsOfficeScene.ts', sceneImports);
 
 test('random office spawn rejects occupied and reserved tiles', () => {
   const scene = new RandomOfficeChatterScene();

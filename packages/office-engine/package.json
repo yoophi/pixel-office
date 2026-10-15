@@ -25,7 +25,9 @@
     "./character": "./src/game/entities/Character.ts",
     "./styles.css": "./src/styles.css",
     "./fonts.css": "./src/fonts.css",
-    "./movement": "./src/game/scenes/OfficeScene.ts"
+    "./movement": "./src/game/scenes/OfficeScene.ts",
+    "./furnished-scene": "./src/game/scenes/PixelAgentsOfficeScene.ts",
+    "./agent-office": "./src/game/AgentOffice.tsx"
   },
   "scripts": {
     "build": "tsc --noEmit",

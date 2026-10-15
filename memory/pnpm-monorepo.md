@@ -52,15 +52,18 @@ flowchart TD
 
 - 의존성은 `workspace:*`, import는 `package.json`의 명시적 `exports`를 사용한다. 앱 소스 상대 경로나 TS alias로 패키지 경계를 우회하지 않는다.
 - `@pixel-office/core`는 브라우저·React·Phaser 없이 실행된다. `/pathfinding`, `/agentOccupancy`, `/pixelAgents`에서 이동·점유·자동 레이아웃 기능을 제공한다.
-- `@pixel-office/engine/react`의 `PhaserGame`은 기본 오피스와 줌 도구를 마운트한다. `debug`와 `autoAssignSeats`로 계측·자동 좌석 배정을 명시한다. 데모 ID 문자열로 동작을 분기하지 않는다.
+- `@pixel-office/engine/agent-office`의 `AgentOffice`는 업무 좌석 9개·회의실·라운지가 있는 서비스 오피스를 마운트한다. `/furnished-scene`은 동일 레이아웃의 데모에서도 재사용한다.
+- `@pixel-office/engine/react`의 `PhaserGame`은 최소 테스트 맵과 줌 도구를 마운트한다. `debug`와 `autoAssignSeats`로 계측·자동 좌석 배정을 명시한다. 데모 ID 문자열로 동작을 분기하지 않는다.
 - `/character`, `/speech`, `/movement`, `/pathfinding`, `/events`, `/pixel-assets` 등으로 개별 기능을 소비한다. 기본 `gameBus`를 사용하는 캔버스는 앱 문서당 하나를 전제로 한다.
-- 공통 CSS는 `/fonts.css`, `/styles.css`를 사용한다. 데모 스타일과 샘플 이벤트는 `demo/shared`에만 둔다.
+- 공통 CSS는 `/fonts.css`, `/styles.css`를 사용한다. 데모 스타일과 시나리오는 `demo/shared`에 둔다. 서비스 오피스의 연결 전 미리보기는 공유 씬에서 제공한다.
 - 공유 패키지는 TypeScript 소스를 export하며 Vite가 소비 앱에서 번들링한다. 패키지 `build`는 타입 검사다. 별도 Node 배포용 JS 라이브러리 산출물은 만들지 않는다.
 - 앱의 Vite 설정은 `@pixel-office/assets/vite`의 `officeViteConfig`를 사용한다. `publicDir`을 공용 원본에 연결하며 빌드 시 각 앱 `dist`에 복사한다. 에셋 URL은 각 앱의 `BASE_URL`을 따른다. 원본 PNG를 앱마다 복제해 관리하지 않는다.
 
 ## 서비스 이벤트 계약
 
-서비스는 샘플 에이전트나 무작위 대화를 생성하지 않는다. 같은 origin의 현재 창 또는 부모 창에서 아래 메시지를 전달한다.
+서비스는 연결 전 샘플 캐릭터 10명(착석 6명·이동 4명)을 표시하고 상태 패널에 미리보기임을 명시한다. 첫 실제 upsert를 받으면 샘플·이동 타이머를 정리하고 실제 캐릭터로 전환한다. 이후 실제 에이전트가 모두 제거되어도 샘플을 다시 만들지 않는다. 샘플은 실제 에이전트 목록에 등록하지 않으며 무작위 대화는 생성하지 않는다.
+
+같은 origin의 현재 창 또는 부모 창에서 아래 메시지를 전달한다.
 
 ```ts
 window.postMessage({
