@@ -2,7 +2,11 @@
 
 > 2026-04-22 작성. 이번 세션에서 추가된 데모 라우트 구조와 공통 캔버스 제어 규칙을 정리합니다.
 
-## Demo route 구조
+## 현재 앱 구조 (2026-10-15)
+
+데모는 서비스의 해시 라우트에서 `demo/*` 독립 앱으로 옮겼다. 개별 앱은 하나의 데모를 렌더링하며 개발 포트 5200–5208을 사용한다. 탐색은 앱 간 실제 링크로 이동한다. 서비스에는 데모 라우트와 탐색이 없다. 아래는 이전 라우트 구현 기록이며 최신 실행 방법은 [pnpm-monorepo.md](pnpm-monorepo.md)를 따른다. 공용 캔버스는 `packages/office-engine/src/game/PhaserGame.tsx`에 있다. 장애물 환경 이벤트는 `office:obstacles-set`으로 바뀌었다.
+
+## 이전 Demo route 구조
 
 - 데모 화면은 `HashRouter` 기반의 `/demo/*` 라우트로 제공합니다.
 - 라우트 목록과 네비게이션 메타데이터는 `src/ui/demoRoutes.ts`에서 관리합니다.

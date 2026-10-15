@@ -7,19 +7,20 @@
 **pixel-office** — React + TypeScript + Vite 기반 브라우저 앱으로, **코딩 에이전트(Claude Code 등)의 상태를 픽셀 캐릭터로 시각화**합니다. 오피스·가구·경로 탐색·좌석·사회적 버블은 모두 에이전트 상태를 표현하는 도구이며, 게임이 아니라 **관찰(observability) 도구**입니다.
 
 ### 기술 스택
-- pnpm 9.15.5 workspace (`apps/*`, `packages/*`)
+- pnpm 9.15.5 workspace (`apps/*`, `packages/*`, `demo/*`)
 - React 19, TypeScript, Vite, Phaser 4
 - 웹 앱 패키지: `@pixel-office/web`
 
 ### 디렉토리 개요
-- `apps/web/src/` — 앱·도메인·브릿지·Phaser·UI
-- `apps/web/public/` — 이미지·폰트·Tiled 맵
-- `apps/web/tests/` — 충돌 회귀 검사
-- `apps/web/scripts/` — 에셋 생성 스크립트
+- `apps/web/src/app`, `apps/web/src/host` — 서비스 화면과 에이전트 이벤트 수신
+- `demo/*` — 데모별 독립 앱, `demo/shared`는 데모 전용 시나리오
+- `packages/office-core` — 순수 타입·이동 경로·점유·레이아웃 생성
+- `packages/office-engine` — Phaser·말풍선·이동 controller·React 캔버스
+- `packages/office-assets` — 공용 public 에셋·맵·폰트·생성 스크립트
+- 각 패키지의 `tests/` — 해당 기능 회귀 검사
 - `memory/`, `docs/` — 프로젝트 문서
-- `packages/*` — 향후 공용 패키지 위치(현재 없음)
 
-루트에서 `pnpm dev`, `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm typecheck`를 실행합니다. 과거 문서의 앱 상대 경로는 현재 `apps/web/` 아래에서 찾습니다.
+루트에서 `pnpm dev`(서비스), `pnpm dev:demos`(데모), `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm typecheck`를 실행합니다. 패키지는 공개 exports로 소비하며 서비스·공유 코드에서 데모 소스를 import하지 않습니다.
 
 v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.md) 참고.
 
