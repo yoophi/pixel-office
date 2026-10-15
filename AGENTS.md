@@ -45,6 +45,10 @@ v2의 새 디렉토리 구조는 [`memory/architecture.md`](memory/architecture.
 
 - [`memory/interior-assets-compatibility.md`](memory/interior-assets-compatibility.md) — Downloads/Interior 에셋 크기 실측과 16px 타일 호환성 조사.
 
+- [`memory/pixtuoid-agent-status-display.md`](memory/pixtuoid-agent-status-display.md) — Pixtuoid의 에이전트 상태 모델·포즈 파생·시각 채널과 pixel-office 비교.
+- [`memory/pixtuoid-resize-relayout.md`](memory/pixtuoid-resize-relayout.md) — Pixtuoid의 리사이즈 감지, `(w, h, seed)` 레이아웃 memo, 비감소 수용 인원 규칙.
+- [`memory/pixel-agents-assets-and-layout.md`](memory/pixel-agents-assets-and-layout.md) — pixel-agents 가구 manifest 해석·배치/이동 제약과 pixtuoid 규칙 기반 오피스 생성(`/demo/pixel-agents-office`).
+
 미래의 에이전트가 알아야 할 프로젝트 수준의 사실(아키텍처 결정, 마이그레이션 상태, 외부 제약 등)을 새로 알게 되면 `memory/<topic>.md`를 추가하고 여기에 링크합니다.
 
 ## 작업 규칙

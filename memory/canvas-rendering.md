@@ -65,4 +65,11 @@ zoom    = max(1, floor(fitZoom))
 3. **지금 몇 배로 보고 있는지 UI에 표시되지 않음**.
 4. 옵션 축이 "Canvas 크기 × Aspect"라서 "픽셀 매치 우선"이 아님.
 
+## 랜덤 오피스 데모의 차이
+
+- `/demo/random-office-chatter`는 샘플 맵 Scene과 달리 브라우저 viewport 전체를 월드 크기로 사용하며 카메라 줌은 `1`입니다.
+- 타일 크기와 캐릭터·가구 sprite만 `PIXEL_VIEW_SCALE = 2`를 적용하고, 말풍선은 화면 기준 `13px`로 표시합니다.
+- 말풍선 텍스트는 기본 최소 해상도 `3`을 사용합니다.
+- 랜덤 오피스 말풍선은 고해상도 텍스처가 화면으로 축소될 때 남는 반투명 획을 알파 임계값 `128`로 이진화합니다. 이 보정은 말풍선 텍스트에만 적용하며 sprite의 `NEAREST` 필터는 바꾸지 않습니다.
+
 개선 계획은 [`plan/20260422-pixel-match-zoom.md`](plan/20260422-pixel-match-zoom.md) 참고.

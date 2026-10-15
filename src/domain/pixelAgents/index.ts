@@ -1,0 +1,38 @@
+export {
+  buildFurnitureCatalog,
+  getOnAnimationFrames,
+  type FurnitureCatalog,
+  type FurnitureCatalogEntry,
+  type FurnitureManifest,
+} from './manifest.js';
+export {
+  checkPlacement,
+  findPath,
+  getBlockedTiles,
+  getTile,
+  isWalkable,
+  layoutToDrawInstances,
+  layoutToSeats,
+  PIXEL_AGENTS_TILE_SIZE,
+  tileKey,
+  TileType,
+  type ColorValue,
+  type Facing,
+  type FurnitureDrawInstance,
+  type LayoutSeat,
+  type OfficeLayout,
+  type PlacedFurniture,
+  type PlacementFailure,
+} from './layout.js';
+export {
+  createOfficeLayoutMemo,
+  generateOfficeLayout,
+  minOfficeSize,
+  variantFromSeed,
+  type FloorVariant,
+  type GeneratedOffice,
+  type SkippedFurniture,
+  type Waypoint,
+  type WaypointKind,
+  type Workstation,
+} from './generate.js';
