@@ -14,6 +14,7 @@
     "test": "pnpm -r run test",
     "typecheck": "pnpm -r run typecheck",
     "preview": "pnpm --filter @pixel-office/web preview",
-    "assets:build": "pnpm --filter @pixel-office/web assets:build"
+    "assets:build": "pnpm --filter @pixel-office/assets assets:build",
+    "dev:demos": "pnpm --parallel --filter '@pixel-office/demo-*' run dev"
   }
 }

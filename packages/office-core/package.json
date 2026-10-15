@@ -1,0 +1,41 @@
+{
+  "name": "@pixel-office/core",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./mapping": "./src/mapping.ts",
+    "./agent": "./src/agent.ts",
+    "./view": "./src/view.ts",
+    "./events": "./src/events.ts",
+    ".": "./src/index.ts",
+    "./agentOccupancy": "./src/agentOccupancy.ts",
+    "./office": "./src/office.ts",
+    "./pixelAgents/layout": "./src/pixelAgents/layout.ts",
+    "./pixelAgents/manifest": "./src/pixelAgents/manifest.ts",
+    "./pixelAgents/generate": "./src/pixelAgents/generate.ts",
+    "./pixelAgents": "./src/pixelAgents/index.ts",
+    "./pathfinding": "./src/pathfinding.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/node": "^22",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
+}

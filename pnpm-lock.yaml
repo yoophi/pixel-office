@@ -10,6 +10,431 @@ importers:
 
   apps/web:
     dependencies:
+      '@pixel-office/core':
+        specifier: workspace:*
+        version: link:../../packages/office-core
+      '@pixel-office/engine':
+        specifier: workspace:*
+        version: link:../../packages/office-engine
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/agent-collision:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/agent-crowd-collision:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/depth-sorting:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/interior-assets:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/obstacle-walking:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/pixel-agents-office:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/random-office-chatter:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/shared:
+    dependencies:
+      '@pixel-office/core':
+        specifier: workspace:*
+        version: link:../../packages/office-core
+      '@pixel-office/engine':
+        specifier: workspace:*
+        version: link:../../packages/office-engine
       phaser:
         specifier: ^4.0.0
         version: 4.2.1
@@ -22,6 +447,240 @@ importers:
       react-router-dom:
         specifier: ^7.14.2
         version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      zustand:
+        specifier: ^5.0.12
+        version: 5.0.15(@types/react@19.2.18)(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/speech-bubble:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  demo/speech-bubble-font:
+    dependencies:
+      '@pixel-office/demo-shared':
+        specifier: workspace:*
+        version: link:../shared
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@pixel-office/assets':
+        specifier: workspace:*
+        version: link:../../packages/office-assets
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  packages/office-assets:
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  packages/office-core:
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.5
+      '@types/node':
+        specifier: ^22
+        version: 22.20.4
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@7.3.6(@types/node@22.20.4))
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.5
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.5)
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.20
+        version: 0.4.26(eslint@9.39.5)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.67.0(eslint@9.39.5)(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.2
+        version: 7.3.6(@types/node@22.20.4)
+
+  packages/office-engine:
+    dependencies:
+      '@pixel-office/core':
+        specifier: workspace:*
+        version: link:../office-core
+      phaser:
+        specifier: ^4.0.0
+        version: 4.2.1
+      react:
+        specifier: ^19.1.1
+        version: 19.2.8
       zustand:
         specifier: ^5.0.12
         version: 5.0.15(@types/react@19.2.18)(react@19.2.8)
