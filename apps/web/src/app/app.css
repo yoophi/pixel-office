@@ -1,0 +1,18 @@
+.agent-status-panel {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+  width: min(300px, calc(100vw - 32px));
+  padding: 16px;
+  background: rgba(17, 24, 30, .94);
+  border: 1px solid #526356;
+  font-family: Galmuri11, monospace;
+  font-size: 12px;
+}
+.agent-status-panel h1 { margin: 0 0 8px; font-size: 16px; }
+.agent-status-panel p { color: #b8c7bc; }
+.agent-status-panel ul { list-style: none; padding: 0; margin: 0; }
+.agent-status-panel li { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 10px 0; border-top: 1px solid #34463b; }
+.agent-status-panel small { grid-column: 1 / -1; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }

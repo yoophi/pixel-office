@@ -1,0 +1,56 @@
+{
+  "name": "@pixel-office/engine",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./sync": "./src/bridge/agentSync.ts",
+    "./bus": "./src/bridge/gameBus.ts",
+    "./events": "./src/bridge/index.ts",
+    "./view-store": "./src/shared/viewSettingsStore.ts",
+    "./view-settings": "./src/shared/index.ts",
+    "./rendering": "./src/game/index.ts",
+    "./react": "./src/game/PhaserGame.tsx",
+    "./game/tiled/loader": "./src/game/tiled/loader.ts",
+    "./tilesets": "./src/game/tiled/tilesetVariants.ts",
+    "./office-scene": "./src/game/scenes/OfficeScene.ts",
+    "./game/scenes/BootScene": "./src/game/scenes/BootScene.ts",
+    "./pixel-assets": "./src/game/pixelAgents/assets.ts",
+    "./game/systems/SocialSystem": "./src/game/systems/SocialSystem.ts",
+    "./game/systems/SeatAssignmentSystem": "./src/game/systems/SeatAssignmentSystem.ts",
+    "./pathfinding": "./src/game/systems/PathfindingSystem.ts",
+    "./game/effects/MatrixEffect": "./src/game/effects/MatrixEffect.ts",
+    "./game/assets/interiorAssets": "./src/game/assets/interiorAssets.ts",
+    "./speech": "./src/game/entities/SpeechBubble.ts",
+    "./character": "./src/game/entities/Character.ts",
+    "./styles.css": "./src/styles.css",
+    "./fonts.css": "./src/fonts.css",
+    "./movement": "./src/game/scenes/OfficeScene.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@pixel-office/core": "workspace:*",
+    "phaser": "^4.0.0",
+    "react": "^19.1.1",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/node": "^22",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
+}
